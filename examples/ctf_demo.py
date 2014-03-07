@@ -36,7 +36,9 @@ def get_color(starting_color=None):
     dlg_kwargs = {'show_alpha': False}
     if starting_color:
         dlg_kwargs['current_color'] = tuple_as_color(starting_color)
-    return color_as_tuple(ColorDialog.get_color(**dlg_kwargs))
+
+    color = ColorDialog.get_color(**dlg_kwargs)
+    return None if color is None else color_as_tuple(color)
 
 
 def get_filename(action='save'):

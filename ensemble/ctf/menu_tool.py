@@ -33,8 +33,10 @@ class AddColorAction(BaseCtfAction):
 
     def perform(self, event):
         pos = self._get_relative_event_position(event.enable_event)
-        color_val = (pos[0],) + self.prompt_color()
-        self.component.add_function_node(self.function, color_val)
+        new_color = self.prompt_color()
+        if new_color is not None:
+            color_val = (pos[0],) + new_color
+            self.component.add_function_node(self.function, color_val)
 
 
 class AddOpacityAction(BaseCtfAction):
@@ -58,8 +60,11 @@ class EditColorAction(BaseCtfAction):
         index = self.ui_adaptor.function_index_at_position(*mouse_pos)
         if index is not None:
             color_val = self.function.value_at(index)
-            new_value = (color_val[0],) + self.prompt_color(color_val[1:])
-            self.component.edit_function_node(self.function, index, new_value)
+            edited_color = self.prompt_color(color_val[1:])
+            if edited_color is not None:
+                new_value = (color_val[0],) + edited_color
+                self.component.edit_function_node(self.function, index,
+                                                  new_value)
 
 
 class RemoveNodeAction(Action):
@@ -98,6 +103,9 @@ class LoadFunctionAction(Action):
 
     def perform(self, event):
         filename = self.prompt_filename(action='open')
+        if len(filename) == 0:
+            return
+
         with open(filename, 'r') as fp:
             loaded_data = json.load(fp)
 
@@ -129,6 +137,9 @@ class SaveFunctionAction(Action):
 
     def perform(self, event):
         filename = self.prompt_filename(action='save')
+        if len(filename) == 0:
+            return
+
         function = {'alpha': self.alpha_func.values(),
                     'color': self.color_func.values()}
         with open(filename, 'w') as fp:
