@@ -1,0 +1,19 @@
+from enaml.layout.api import vbox
+from enaml.widgets.api import Container, Window
+from traits_enaml.widgets.enable_canvas import EnableCanvas
+
+
+enamldef CtfDemoWindow(Window): pd_view:
+    attr ctf
+
+    title = "Color Transfer Function Editor"
+    initial_size = (450, 150)
+
+    Container:
+        constraints = [
+            vbox(ctf_editor),
+            ctf_editor.height == 125
+        ]
+
+        EnableCanvas: ctf_editor:
+            component << ctf

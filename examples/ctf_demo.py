@@ -10,12 +10,9 @@ colors at the end points are editable, but cannot be removed.
 from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
-from enable.api import ComponentEditor
 from enaml.colors import Color
 from enaml.qt.qt_application import QtApplication
 from ensemble.ctf.editor import CtfEditor
-from traits.api import HasTraits, Instance
-from traitsui.api import View, UItem
 import traits_enaml
 
 with traits_enaml.imports():
@@ -46,26 +43,15 @@ def get_filename(action='save'):
     return function()
 
 
-class Demo(HasTraits):
-
-    ctf = Instance(CtfEditor)
-
-    traits_view = View(
-        UItem('ctf',
-              editor=ComponentEditor(),
-              style='custom'),
-        width=450,
-        height=150,
-        title="Color Transfer Function Editor",
-        resizable=True,
-    )
-
-
 if __name__ == "__main__":
-    ctf = CtfEditor(prompt_color_selection=get_color,
-                    prompt_file_selection=get_filename)
-    demo = Demo(ctf=ctf)
+    with traits_enaml.imports():
+        from ctf_demo_window import CtfDemoWindow
 
     app = QtApplication()
-    demo.edit_traits()
+
+    ctf = CtfEditor(prompt_color_selection=get_color,
+                    prompt_file_selection=get_filename)
+    win = CtfDemoWindow(ctf=ctf)
+    win.show()
+
     app.start()
