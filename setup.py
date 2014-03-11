@@ -16,5 +16,7 @@ setup(
     description='High-level widgets for building Python applications',
     long_description=open('README.rst').read(),
     packages=find_packages(exclude=('*.tests',)),
+    include_package_data=True,
+    package_data={'ensemble.volren': ['*.enaml']},
     requires=[],
 )

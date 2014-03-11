@@ -1,0 +1,28 @@
+from enaml.application import schedule
+from enaml.layout.api import vbox
+from enaml.widgets.api import Container, MainWindow
+
+from ensemble.volren.volume_render_view import (
+    VolumeRenderView, VolumeRenderClip
+)
+
+
+enamldef VolumeRendererWindow(MainWindow): vr_win:
+    attr renderer
+
+    title = 'Volume Viewer'
+    initial_size=(800, 900)
+
+    activated ::
+        schedule(self.send_to_front)
+
+    Container:
+        constraints = [
+            vbox(vr_view, vr_clip),
+        ]
+
+        VolumeRenderView: vr_view:
+            renderer << vr_win.renderer
+
+        VolumeRenderClip: vr_clip:
+            renderer << vr_win.renderer
