@@ -5,3 +5,4 @@
 *.so
 /build
 /dist
+__enamlcache__/
