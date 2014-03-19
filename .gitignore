@@ -3,6 +3,7 @@
 *.swp
 *.egg-info
 *.so
-/build
-/dist
+
+build/
+dist/
 __enamlcache__/
