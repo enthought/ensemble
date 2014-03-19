@@ -48,10 +48,10 @@ class VolumeData(HasTraits):
         dims = image_data.dimensions
         output_spacing = (spacing[0] * (dims[0] / 256.0),
                           spacing[1] * (dims[1] / 256.0),
-                          spacing[2] * (dims[2] / 128.0))
+                          spacing[2] * (dims[2] / 256.0))
         reslicer = tvtk.ImageReslice(input=image_data,
                                      interpolation_mode='cubic',
-                                     output_extent=(0, 255, 0, 255, 0, 127),
+                                     output_extent=(0, 255, 0, 255, 0, 255),
                                      output_spacing=output_spacing)
         reslicer.update()
         result = reslicer.output
