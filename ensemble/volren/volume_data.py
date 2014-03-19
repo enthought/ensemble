@@ -29,6 +29,9 @@ class VolumeData(HasTraits):
     def _bounds_default(self):
         return tuple(np.array(self.spacing) * np.array(self.data.shape))
 
+    def _spacing_default(self):
+        return (1.0, 1.0, 1.0)
+
     def _image_data_default(self):
         image_data = tvtk.ImageData()
         image_data.spacing = self.spacing
