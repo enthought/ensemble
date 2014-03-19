@@ -1,11 +1,4 @@
-import argparse
-from contextlib import closing
-
 import numpy as np
-import tables
-
-from traits.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
 
 from enaml.qt.qt_application import QtApplication
 import traits_enaml
@@ -17,43 +10,44 @@ with traits_enaml.imports():
     from volume_renderer_window import VolumeRendererWindow
 
 
-def show_volume(volume_file, node_path, slice_range, spacing, flip):
-    with closing(tables.openFile(volume_file, mode='r')) as h5:
-        volume = h5.getNode(node_path)[:]
-    volume = np.swapaxes(volume, 0, -1)
+def main():
+    volume = example_volume()
+    show_volume(volume)
 
-    data_spacing = tuple(spacing[1:]) + (spacing[0],)
-    if flip:
-        volume = volume[:, :, ::-1]
 
+def example_volume(size=61, height=80):
+    cross_section = example_cross_section(size)
+    volume = np.tile(cross_section, (height, 1, 1))
+    volume = volume + 0.2 * np.random.normal(size=volume.shape)
+    return rescale_uint8(volume)
+
+
+def example_cross_section(size):
+    # Create a grid with x/y distances from the center point.
+    r = size // 2
+    grid = slice(-r, r, size * 1j)
+    x, y = np.mgrid[grid, grid]
+
+    # Create circle of ones, with a smaller circle of twos inside.
+    disks = np.zeros((size, size))
+    radial_dist = np.sqrt(x**2 + y**2)
+    disks[radial_dist < r] = 1
+    disks[radial_dist < r/2] = 2
+    return disks
+
+
+def rescale_uint8(array):
+    array = 255 * (array - array.min()) / array.ptp()
+    return array.astype(np.uint8)
+
+
+def show_volume(volume):
     app = QtApplication()
-    volume_data = VolumeData(data=volume, spacing=data_spacing)
+    volume_data = VolumeData(data=volume, spacing=(1, 1, 1))
     renderer = VolumeRenderer(volume_data=volume_data)
     win = VolumeRendererWindow(renderer=renderer)
     win.show()
     app.start()
-
-
-def main():
-    formatter = argparse.ArgumentDefaultsHelpFormatter
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=formatter)
-    parser.add_argument('volume_file', help="HDF5 file containing CT 3D data.")
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help="Set logging verbosity to 'debug'.")
-    parser.add_argument('-r', '--range', nargs=2, type=int,
-                        help="Slice range to display.")
-    parser.add_argument('-s', '--spacing', nargs=3, default=(1.0, 1.0, 1.0),
-                        type=float, help="Spacing for the data array.")
-    parser.add_argument('-n', '--node', default='/ct',
-                        help="Node name for CT volume in the HDF5 file.")
-    parser.add_argument('-f', '--flip', action='store_true',
-                        help="Flip z-direction of the volume.")
-
-    args = parser.parse_args()
-
-    show_volume(args.volume_file, args.node, args.range, args.spacing,
-                args.flip)
 
 
 if __name__ == '__main__':
