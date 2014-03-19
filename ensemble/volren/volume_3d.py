@@ -42,40 +42,37 @@ class Volume3D(Volume):
         self._mapper_types.append('VolumeTextureMapper3D')
 
     def _volume_mapper_type_changed(self, value):
-        mm = self.module_manager
-        if mm is None:
+        if self.module_manager is None:
             return
 
         old_vm = self._volume_mapper
         if old_vm is not None:
             old_vm.on_trait_change(self.render, remove=True)
 
+        ray_cast_functions = ['']
         if value == 'RayCastMapper':
             new_vm = self._get_mapper(tvtk.VolumeRayCastMapper)
-            self._volume_mapper = new_vm
-            self._ray_cast_functions = ['RayCastCompositeFunction',
-                                        'RayCastMIPFunction',
-                                        'RayCastIsosurfaceFunction']
             vrc_func = tvtk.VolumeRayCastCompositeFunction()
             new_vm.volume_ray_cast_function = vrc_func
+            ray_cast_functions = ['RayCastCompositeFunction',
+                                  'RayCastMIPFunction',
+                                  'RayCastIsosurfaceFunction']
         elif value == 'TextureMapper2D':
             new_vm = self._get_mapper(tvtk.VolumeTextureMapper2D)
-            self._volume_mapper = new_vm
-            self._ray_cast_functions = ['']
         elif value == 'VolumeTextureMapper3D':
             new_vm = self._get_mapper(tvtk.VolumeTextureMapper3D)
-            self._volume_mapper = new_vm
-            self._ray_cast_functions = ['']
         elif value == 'VolumeProMapper':
             new_vm = self._get_mapper(tvtk.VolumeProMapper)
-            self._volume_mapper = new_vm
-            self._ray_cast_functions = ['']
         elif value == 'FixedPointVolumeRayCastMapper':
             new_vm = self._get_mapper(tvtk.FixedPointVolumeRayCastMapper)
-            self._volume_mapper = new_vm
-            self._ray_cast_functions = ['']
+        else:
+            msg = "Unsupported volume mapper type: '{0}'".format(value)
+            raise ValueError(msg)
 
-        new_vm.input = mm.source.outputs[0]
+        self._volume_mapper = new_vm
+        self._ray_cast_functions = ray_cast_functions
+
+        new_vm.input = self.module_manager.source.outputs[0]
         self.volume.mapper = new_vm
         new_vm.on_trait_change(self.render)
 
