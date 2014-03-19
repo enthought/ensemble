@@ -1,3 +1,16 @@
+"""
+Example of displaying a volume using the volume renderer.
+
+This example creates a simple example volume with nested cylinders and a bit
+of noise. The color bar on the bottom displays the transfer function that maps
+values in the data to a color and opacity. Right click on the color bar to
+alter the renderer's transfer function:
+
+    * Add Color: Add a slider to control the color of intensity values.
+    * Add Opacity: Adds a control point to adjust the shape of the
+      transfer function, which controls the opacity of intensity values.
+
+"""
 import numpy as np
 
 from enaml.qt.qt_application import QtApplication
