@@ -33,5 +33,8 @@ def get_filename(action='save'):
     If no file is selected (because the user cancels the dialog), return an
     empty string
     """
-    function = getattr(FileDialogEx, 'get_' + action + '_file_name')
-    return function()
+    functions = {
+        'save': FileDialogEx.get_save_file_name,
+        'open': FileDialogEx.get_open_file_name,
+    }
+    return functions[action]()
