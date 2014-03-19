@@ -89,10 +89,8 @@ class VolumeRenderer(HasTraits):
     #--------------------------------------------------------------------------
 
     def _setup_volume(self):
-        mapper_settings = {'sample_distance': 0.2}
-        property_settings = {'shade': False}
-        self.volume.volume_mapper.trait_set(**mapper_settings)
-        self.volume.volume_property.trait_set(**property_settings)
+        self.volume.volume_mapper.trait_set(sample_distance=0.2)
+        self.volume.volume_property.trait_set(shade=False)
         self.ctf_updated()
 
     def _set_volume_clip_planes(self):
