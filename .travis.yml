@@ -17,3 +17,5 @@ script:
 notifications:
   email:
     - travis-ci@enthought.com
+after_success:
+  - coverage report
