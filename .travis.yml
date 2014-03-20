@@ -10,6 +10,7 @@ before_install:
   - sudo apt-get install python-vtk python-qt4 python-qt4-dev python-sip python-qt4-gl libqt4-scripttools swig
 install:
   - pip install cython
+  - pip install coveralls
   - pip install -r dev_requirements.txt --use-mirrors
   - python setup.py develop
 script:
@@ -17,5 +18,5 @@ script:
 notifications:
   email:
     - travis-ci@enthought.com
-after_success:
-  - coverage report
+after_script:
+  - coveralls
