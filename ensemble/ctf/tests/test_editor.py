@@ -2,6 +2,7 @@ import unittest
 
 from enable.testing import EnableTestAssistant
 from enable.window import Window
+from traits_enaml.testing.gui_test_assistant import GuiTestAssistant
 
 from ensemble.ctf.editor import CtfEditor
 
@@ -16,9 +17,11 @@ def get_filename(action='save'):
     return 'temp.json'
 
 
-class TestCtfEditor(EnableTestAssistant, unittest.TestCase):
+class TestCtfEditor(EnableTestAssistant, GuiTestAssistant, unittest.TestCase):
 
     def setUp(self):
+        super(TestCtfEditor, self).setUp()
+
         tool = CtfEditor(bounds=(400, 100),
                          prompt_color_selection=get_color,
                          prompt_file_selection=get_filename)
@@ -26,7 +29,8 @@ class TestCtfEditor(EnableTestAssistant, unittest.TestCase):
         tool.add_function_node(tool.colors, (0.25, 1.0, 0.0, 0.0))
         self.tool = tool
         self.window = Window(None, size=(100, 100), component=tool)
-        self.window.control.show()
+        with self.event_loop():
+            self.window.control.show()
 
     def test_mouse_drag_alpha(self):
         tool = self.tool
