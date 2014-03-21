@@ -1,0 +1,45 @@
+from enaml.layout.api import vbox
+from enaml.widgets.api import Container, DualSlider, Form, Label
+from traits_enaml.widgets.enable_canvas import EnableCanvas
+from traits_enaml.widgets.mayavi_canvas import MayaviCanvas
+
+
+enamldef _ClipPlaneSlider(DualSlider):
+    minimum = 0
+    maximum = 100
+
+
+enamldef VolumeRenderClip(Form):
+    attr renderer
+
+    Label: x_clip_label:
+        text = 'X Clip'
+    _ClipPlaneSlider: x_clipper:
+        low_value >> renderer.clip_bounds[0]
+        high_value >> renderer.clip_bounds[1]
+    Label: y_clip_label:
+        text = 'Y Clip'
+    _ClipPlaneSlider: y_clipper:
+        low_value >> renderer.clip_bounds[2]
+        high_value >> renderer.clip_bounds[3]
+    Label: z_clip_label:
+        text = 'Z Clip'
+    _ClipPlaneSlider: z_clipper:
+        low_value >> renderer.clip_bounds[4]
+        high_value >> renderer.clip_bounds[5]
+
+
+enamldef VolumeRenderView(Container):
+    attr renderer
+
+    constraints = [
+        vbox(volume, ctf_editor),
+        ctf_editor.height == 125
+    ]
+
+    MayaviCanvas: volume:
+        scene << renderer.model
+        show_toolbar = False
+
+    EnableCanvas: ctf_editor:
+        component << renderer.ctf_editor
