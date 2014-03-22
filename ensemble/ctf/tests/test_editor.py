@@ -1,5 +1,8 @@
 import unittest
 
+from traits.etsconfig.api import ETSConfig
+ETSConfig.toolkit = 'qt4'
+
 from enable.testing import EnableTestAssistant
 from enable.window import Window
 from traits_enaml.testing.gui_test_assistant import GuiTestAssistant
