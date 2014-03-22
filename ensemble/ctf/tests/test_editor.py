@@ -1,7 +1,9 @@
 import unittest
 
+# Do a dance to force ETS to use Qt and make sure that enaml imports Qt first.
 from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
+import enaml.qt  # NOQA
 
 from enable.testing import EnableTestAssistant
 from enable.window import Window
