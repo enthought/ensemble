@@ -1,10 +1,5 @@
 import unittest
 
-# Do a dance to force ETS to use Qt and make sure that enaml imports Qt first.
-from traits.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'qt4'
-import enaml.qt  # NOQA
-
 from enable.testing import EnableTestAssistant
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 
@@ -33,6 +28,8 @@ from traits_enaml.widgets.enable_canvas import EnableCanvas
 enamldef MainView(MainWindow):
     attr editor
 
+    initial_size = (400, 100)
+
     EnableCanvas:
         component << editor
 """
@@ -56,13 +53,15 @@ enamldef MainView(MainWindow):
 
     def test_mouse_drag_alpha(self):
         editor = self.editor
-        self.press_move_release(editor, [(50, 50), (51, 50), (52, 50),
-                                         (53, 50), (54, 50), (55, 50)],
+        self.press_move_release(editor, [(200, 50), (220, 50), (240, 50),
+                                         (260, 50), (280, 50), (300, 50)],
                                 window=editor.window)
+        editor.request_redraw()
 
     def test_mouse_drag_color(self):
         editor = self.editor
-        self.press_move_release(editor, [(25, 10), (25, 10), (40, 10)],
+        self.press_move_release(editor, [(100, 50), (120, 50), (140, 50),
+                                         (160, 50), (180, 50), (200, 50)],
                                 window=editor.window)
 
 if __name__ == '__main__':
