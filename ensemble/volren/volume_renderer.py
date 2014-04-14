@@ -1,6 +1,5 @@
 from mayavi.core.ui.api import MlabSceneModel
 from mayavi.sources.vtk_data_source import VTKDataSource
-from mayavi.tools.engine_manager import engine_manager
 from mayavi.tools.tools import add_dataset
 from traits.api import HasTraits, CInt, Float, Instance, List, on_trait_change
 from tvtk.api import tvtk
