@@ -137,6 +137,7 @@ class VolumeRenderer(HasTraits):
 
     def _histogram_bins_changed(self, new):
         if new > 0:
-            self.ctf_editor.histogram = np.histogram(self.volume_data.data, bins=new, density=False)
+            self.ctf_editor.histogram = np.histogram(self.volume_data.data,
+                                                     bins=new, density=False)
         else:
             self.ctf_editor.histogram = None
