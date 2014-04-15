@@ -1,6 +1,7 @@
 import numpy as np
 
 from mayavi.core.ui.api import MlabSceneModel
+from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import CInt, Float, HasTraits, Instance, List, \
     on_trait_change
@@ -21,7 +22,10 @@ class VolumeRenderer(HasTraits):
     # The data to plot
     volume_data = Instance(VolumeData)
 
-    # The volume object
+    # The mayavi data source for the volume data
+    volume_data_source = Instance(VTKDataSource)
+
+    # The mayavi volume renderer object
     volume = Instance(Volume3D)
 
     # The minimum and maximum displayed intensity values.
@@ -56,6 +60,12 @@ class VolumeRenderer(HasTraits):
         self.vmin = self.volume_data.data.min()
         self.vmax = self.volume_data.data.max()
 
+        if self.volume_data_source is not None:
+            image_data = self.volume_data.resampled_image_data
+            self.volume_data_source.data = image_data
+            self.volume_data_source.update()
+            self._setup_volume()
+
     def _clip_bounds_items_changed(self):
         self._set_volume_clip_planes()
 
@@ -87,6 +97,7 @@ class VolumeRenderer(HasTraits):
     def display_model(self):
         sf = add_dataset(self.volume_data.resampled_image_data,
                          figure=self.model.mayavi_scene)
+        self.volume_data_source = sf
         self.volume = volume3d(sf, figure=self.model.mayavi_scene)
         self._setup_volume()
 
