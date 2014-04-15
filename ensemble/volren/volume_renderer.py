@@ -1,6 +1,9 @@
+import numpy as np
+
 from mayavi.core.ui.api import MlabSceneModel
 from mayavi.tools.tools import add_dataset
-from traits.api import HasTraits, CInt, Float, Instance, List, on_trait_change
+from traits.api import CInt, Float, HasTraits, Instance, List, \
+    on_trait_change
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
@@ -30,6 +33,9 @@ class VolumeRenderer(HasTraits):
 
     # The transfer function editor
     ctf_editor = Instance(CtfEditor)
+
+    # Whether to show the histogram on the CTF editor.
+    histogram_bins = CInt(0)
 
     #--------------------------------------------------------------------------
     # Default values
@@ -61,8 +67,15 @@ class VolumeRenderer(HasTraits):
 
         for color in self.ctf_editor.colors.items():
             ctf.add_rgb_point(lerp(color[0]), *(color[1:]))
-        for alpha in self.ctf_editor.opacities.items():
-            otf.add_point(lerp(alpha[0]), alpha[1])
+        alphas = self.ctf_editor.opacities.items()
+        for i, alpha in enumerate(alphas):
+            x = alpha[0]
+            if i > 0:
+                # Look back one item. VTK doesn't like exact vertical jumps, so
+                # we need to jog a value that is exactly equal by a little bit.
+                if alphas[i-1][0] == alpha[0]:
+                    x += 1e-8
+            otf.add_point(lerp(x), alpha[1])
 
         self._set_volume_ctf(ctf, otf)
 
@@ -110,3 +123,9 @@ class VolumeRenderer(HasTraits):
         vp.set_scalar_opacity(otf)
         vp.set_color(ctf)
         self.volume._update_ctf_fired()
+
+    def _histogram_bins_changed(self, new):
+        if new > 0:
+            self.ctf_editor.histogram = np.histogram(self.volume_data.data, bins=new, density=False)
+        else:
+            self.ctf_editor.histogram = None

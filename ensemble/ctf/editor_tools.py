@@ -95,7 +95,7 @@ class AlphaFunctionEditorTool(FunctionEditorTool):
             x_limits = tuple([value_at(i)[0] for i in (index-1, index+1)])
 
         x_val = min(max(x_limits[0], start_value[0] + delta_x), x_limits[1])
-        new_value = (x_val, start_value[1] + delta_y)
+        new_value = (x_val, clip_to_unit(start_value[1] + delta_y))
         self.function.update(index, new_value)
         self.function_updated = True
 

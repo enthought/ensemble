@@ -23,11 +23,6 @@ with traits_enaml.imports():
     from volume_renderer_window import VolumeRendererWindow
 
 
-def main():
-    volume = example_volume()
-    show_volume(volume)
-
-
 def example_volume(size=61, height=80):
     cross_section = example_cross_section(size)
     volume = np.tile(cross_section, (height, 1, 1))
@@ -58,9 +53,35 @@ def show_volume(volume):
     app = QtApplication()
     volume_data = VolumeData(data=volume)
     renderer = VolumeRenderer(volume_data=volume_data)
+    renderer.histogram_bins = 200
     win = VolumeRendererWindow(renderer=renderer)
     win.show()
     app.start()
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-n', '--node', default='/ct',
+                        help='The path to the node in the HDF5 file '
+                             'containing the volume data.')
+    parser.add_argument('volume_file', nargs='?',
+                        help='The HDF5 file containing the volume data. '
+                             'If omitted, an example volume will be '
+                             'generated.')
+
+    args = parser.parse_args()
+    if args.volume_file is None:
+        h5 = None
+        volume = example_volume()
+    else:
+        import tables
+        h5 = tables.openFile(args.volume_file)
+        volume = h5.getNode(args.node)[:].T
+    show_volume(volume)
+    if h5 is not None:
+        h5.close()
 
 
 if __name__ == '__main__':
