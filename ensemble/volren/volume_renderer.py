@@ -4,7 +4,7 @@ from mayavi.core.ui.api import MlabSceneModel
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import CInt, Enum, Float, HasTraits, Instance, List, \
-    on_trait_change
+    Range, on_trait_change
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
@@ -74,6 +74,9 @@ class VolumeRenderer(HasTraits):
     # Whether to show the histogram on the CTF editor.
     histogram_bins = CInt(0)
 
+    # A global multiplier to the opacity transfer function.
+    global_alpha = Range(0.0, 1.0, value=1.0)
+
     #--------------------------------------------------------------------------
     # Default values
     #--------------------------------------------------------------------------
@@ -105,7 +108,7 @@ class VolumeRenderer(HasTraits):
     def _render_quality_changed(self):
         self._setup_volume()
 
-    @on_trait_change('ctf_editor.function_updated')
+    @on_trait_change('ctf_editor.function_updated,global_alpha')
     def ctf_updated(self):
         ctf = tvtk.ColorTransferFunction()
         otf = tvtk.PiecewiseFunction()
@@ -121,7 +124,7 @@ class VolumeRenderer(HasTraits):
                 # we need to jog a value that is exactly equal by a little bit.
                 if alphas[i-1][0] == alpha[0]:
                     x += 1e-8
-            otf.add_point(lerp(x), alpha[1])
+            otf.add_point(lerp(x), alpha[1] * self.global_alpha)
 
         self._set_volume_ctf(ctf, otf)
 
