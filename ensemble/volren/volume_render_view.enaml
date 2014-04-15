@@ -41,8 +41,6 @@ enamldef VolumeRenderCTF(Container):
     attr renderer
 
     share_layout = True
-    hug_height = 'required'
-    hug_width = 'required'
 
     EnableCanvas: ctf_editor:
         component << renderer.ctf_editor
