@@ -66,7 +66,7 @@ class VolumeRenderer(HasTraits):
     clip_bounds = List(Float)
 
     # Render quality setting
-    render_quality = Enum('default', QUALITY_SETTINGS.keys())
+    render_quality = Enum('performance', QUALITY_SETTINGS.keys())
 
     # The transfer function editor
     ctf_editor = Instance(CtfEditor)
