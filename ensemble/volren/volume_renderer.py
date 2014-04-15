@@ -135,9 +135,13 @@ class VolumeRenderer(HasTraits):
         vp.set_color(ctf)
         self.volume._update_ctf_fired()
 
-    def _histogram_bins_changed(self, new):
-        if new > 0:
+    @on_trait_change('histogram_bins,volume_data')
+    def _new_histogram(self):
+        if (self.histogram_bins > 0 and
+                self.volume_data is not None and
+                self.volume_data.data is not None):
             self.ctf_editor.histogram = np.histogram(self.volume_data.data,
-                                                     bins=new, density=False)
+                                                     bins=self.histogram_bins,
+                                                     density=False)
         else:
             self.ctf_editor.histogram = None
