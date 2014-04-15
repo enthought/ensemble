@@ -99,8 +99,7 @@ class CtfEditor(Component):
     #------------------------------------------------------------------------
 
     def _histogram_changed(self):
-        if self.histogram is not None:
-            self.request_redraw()
+        self.request_redraw()
 
     #------------------------------------------------------------------------
     # Drawing
