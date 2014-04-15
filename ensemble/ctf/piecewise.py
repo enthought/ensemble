@@ -51,6 +51,16 @@ class PiecewiseFunction(object):
         # Return a copy
         return self._values[:]
 
+    def update_from_function(self, other):
+        self.clear()
+        self._keys = other._keys[:]
+        self._values = other._values[:]
+
+    def copy(self):
+        other = type(self)(key=self.keyfunc)
+        other.update_from_function(self)
+        return other
+
 
 def verify_values(function_values):
     """Make sure a sequence of values are valid function values.

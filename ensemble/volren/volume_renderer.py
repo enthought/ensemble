@@ -130,10 +130,11 @@ class VolumeRenderer(HasTraits):
         self.volume.volume.mapper.clipping_planes = planes
 
     def _set_volume_ctf(self, ctf, otf):
-        vp = self.volume.volume_property
-        vp.set_scalar_opacity(otf)
-        vp.set_color(ctf)
-        self.volume._update_ctf_fired()
+        if self.volume is not None:
+            vp = self.volume.volume_property
+            vp.set_scalar_opacity(otf)
+            vp.set_color(ctf)
+            self.volume._update_ctf_fired()
 
     @on_trait_change('histogram_bins,volume_data')
     def _new_histogram(self):
