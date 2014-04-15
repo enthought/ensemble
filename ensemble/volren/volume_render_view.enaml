@@ -1,4 +1,4 @@
-from enaml.layout.api import vbox
+from enaml.layout.api import align, vbox
 from enaml.widgets.api import Container, DualSlider, Form, Label
 from traits_enaml.widgets.enable_canvas import EnableCanvas
 from traits_enaml.widgets.mayavi_canvas import MayaviCanvas
@@ -29,17 +29,36 @@ enamldef VolumeRenderClip(Form):
         high_value >> renderer.clip_bounds[5]
 
 
-enamldef VolumeRenderView(Container):
+enamldef VolumeRenderVolume(Container):
     attr renderer
-
-    constraints = [
-        vbox(volume, ctf_editor),
-        ctf_editor.height == 125
-    ]
 
     MayaviCanvas: volume:
         scene << renderer.model
         show_toolbar = False
 
+
+enamldef VolumeRenderCTF(Container):
+    attr renderer
+
+    share_layout = True
+    hug_height = 'required'
+    hug_width = 'required'
+
     EnableCanvas: ctf_editor:
         component << renderer.ctf_editor
+
+
+enamldef VolumeRenderView(Container): vol_view:
+    attr renderer
+
+    constraints = [
+        vbox(volume, ctf),
+        align('width', volume, ctf),
+        ctf.height == 125,
+    ]
+
+    VolumeRenderVolume: volume:
+        renderer << vol_view.renderer
+
+    VolumeRenderCTF: ctf:
+        renderer << vol_view.renderer
