@@ -1,6 +1,8 @@
 import numpy as np
 
+from mayavi.core.api import PipelineBase
 from mayavi.core.ui.api import MlabSceneModel
+from mayavi import mlab
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import CInt, Enum, Float, HasTraits, Instance, List, \
@@ -45,6 +47,32 @@ QUALITY_SETTINGS = {
 }
 
 
+def _lerp(x, x0, x1, y0, y1):
+    if x0 == x1:
+        return y0
+    a = (x - x0) / (x1 - x0)
+    return (1-a)*y0 + a*y1
+
+
+def vtk_lut_from_ctf(ctf, otf, ncolors=256):
+    lut = tvtk.LookupTable(ramp='linear', number_of_colors=ncolors)
+    lut.build()
+    for i in range(ncolors):
+        x = float(i) / ncolors
+        j0, j1 = ctf.neighbor_indices(x)
+        x0, r0, g0, b0 = ctf.value_at(j0)
+        x1, r1, g1, b1 = ctf.value_at(j1)
+        r = _lerp(x, x0, x1, r0, r1)
+        g = _lerp(x, x0, x1, g0, g1)
+        b = _lerp(x, x0, x1, b0, b1)
+        j0, j1 = otf.neighbor_indices(x)
+        x0, a0 = otf.value_at(j0)
+        x1, a1 = otf.value_at(j1)
+        a = _lerp(x, x0, x1, a0, a1)
+        lut.set_table_value(i, (r, g, b, a))
+    return lut
+
+
 class VolumeRenderer(HasTraits):
     # The view displayed
     model = Instance(MlabSceneModel, ())
@@ -68,6 +96,9 @@ class VolumeRenderer(HasTraits):
     # Render quality setting
     render_quality = Enum('performance', QUALITY_SETTINGS.keys())
 
+    # Image slice in Z.
+    ipw_z = Instance(PipelineBase)
+
     # The transfer function editor
     ctf_editor = Instance(CtfEditor)
 
@@ -75,7 +106,7 @@ class VolumeRenderer(HasTraits):
     histogram_bins = CInt(0)
 
     # A global multiplier to the opacity transfer function.
-    global_alpha = Range(0.0, 1.0, value=1.0)
+    volume_alpha = Range(0.0, 1.0, value=1.0)
 
     #--------------------------------------------------------------------------
     # Default values
@@ -108,7 +139,7 @@ class VolumeRenderer(HasTraits):
     def _render_quality_changed(self):
         self._setup_volume()
 
-    @on_trait_change('ctf_editor.function_updated,global_alpha')
+    @on_trait_change('ctf_editor.function_updated,volume_alpha')
     def ctf_updated(self):
         ctf = tvtk.ColorTransferFunction()
         otf = tvtk.PiecewiseFunction()
@@ -124,9 +155,13 @@ class VolumeRenderer(HasTraits):
                 # we need to jog a value that is exactly equal by a little bit.
                 if alphas[i-1][0] == alpha[0]:
                     x += 1e-8
-            otf.add_point(lerp(x), alpha[1] * self.global_alpha)
+            otf.add_point(lerp(x), alpha[1] * self.volume_alpha)
 
         self._set_volume_ctf(ctf, otf)
+
+        # Update the slicer LUT.
+        self._set_slicer_ctf(self.ctf_editor.colors,
+                             self.ctf_editor.opacities)
 
     #--------------------------------------------------------------------------
     # Scene activation callbacks
@@ -138,6 +173,14 @@ class VolumeRenderer(HasTraits):
                          figure=self.model.mayavi_scene)
         self.volume_data_source = sf
         self.volume = volume3d(sf, figure=self.model.mayavi_scene)
+
+        self.ipw_z = mlab.pipeline.image_plane_widget(
+            self.volume_data_source,
+            figure=self.model.mayavi_scene,
+            plane_orientation='z_axes',
+        )
+        self.ipw_z.visible = False
+
         self._setup_volume()
 
         self.model.mlab.view(40, 50)
@@ -175,6 +218,13 @@ class VolumeRenderer(HasTraits):
             vp.set_scalar_opacity(otf)
             vp.set_color(ctf)
             self.volume._update_ctf_fired()
+
+    def _set_slicer_ctf(self, ctf, otf):
+        if self.ipw_z is not None:
+            lut = vtk_lut_from_ctf(ctf, otf)
+            lut.range = np.array([self.vmin, self.vmax])
+            self.ipw_z.ipw.lookup_table = lut
+            self.ipw_z.render()
 
     @on_trait_change('histogram_bins,volume_data')
     def _new_histogram(self):
