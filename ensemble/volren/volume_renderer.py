@@ -47,32 +47,6 @@ QUALITY_SETTINGS = {
 }
 
 
-def _lerp(x, x0, x1, y0, y1):
-    if x0 == x1:
-        return y0
-    a = (x - x0) / (x1 - x0)
-    return (1-a)*y0 + a*y1
-
-
-def vtk_lut_from_ctf(ctf, otf, ncolors=256):
-    lut = tvtk.LookupTable(ramp='linear', number_of_colors=ncolors)
-    lut.build()
-    for i in range(ncolors):
-        x = float(i) / ncolors
-        j0, j1 = ctf.neighbor_indices(x)
-        x0, r0, g0, b0 = ctf.value_at(j0)
-        x1, r1, g1, b1 = ctf.value_at(j1)
-        r = _lerp(x, x0, x1, r0, r1)
-        g = _lerp(x, x0, x1, g0, g1)
-        b = _lerp(x, x0, x1, b0, b1)
-        j0, j1 = otf.neighbor_indices(x)
-        x0, a0 = otf.value_at(j0)
-        x1, a1 = otf.value_at(j1)
-        a = _lerp(x, x0, x1, a0, a1)
-        lut.set_table_value(i, (r, g, b, a))
-    return lut
-
-
 class VolumeRenderer(HasTraits):
     # The view displayed
     model = Instance(MlabSceneModel, ())
@@ -96,7 +70,9 @@ class VolumeRenderer(HasTraits):
     # Render quality setting
     render_quality = Enum('performance', QUALITY_SETTINGS.keys())
 
-    # Image slice in Z.
+    # Image slices.
+    ipw_x = Instance(PipelineBase)
+    ipw_y = Instance(PipelineBase)
     ipw_z = Instance(PipelineBase)
 
     # The transfer function editor
@@ -107,6 +83,10 @@ class VolumeRenderer(HasTraits):
 
     # A global multiplier to the opacity transfer function.
     volume_alpha = Range(0.0, 1.0, value=1.0)
+    slicer_alpha = Range(0.0, 1.0, value=1.0)
+
+    cut_brightness = Range(-1.0, 1.0, value=0.0)
+    cut_contrast = Range(-1.0, 1.0, value=0.0)
 
     #--------------------------------------------------------------------------
     # Default values
@@ -159,10 +139,6 @@ class VolumeRenderer(HasTraits):
 
         self._set_volume_ctf(ctf, otf)
 
-        # Update the slicer LUT.
-        self._set_slicer_ctf(self.ctf_editor.colors,
-                             self.ctf_editor.opacities)
-
     #--------------------------------------------------------------------------
     # Scene activation callbacks
     #--------------------------------------------------------------------------
@@ -174,12 +150,15 @@ class VolumeRenderer(HasTraits):
         self.volume_data_source = sf
         self.volume = volume3d(sf, figure=self.model.mayavi_scene)
 
-        self.ipw_z = mlab.pipeline.image_plane_widget(
-            self.volume_data_source,
-            figure=self.model.mayavi_scene,
-            plane_orientation='z_axes',
-        )
-        self.ipw_z.visible = False
+        for axis in 'xyz':
+            ipw = mlab.pipeline.image_plane_widget(
+                self.volume_data_source,
+                figure=self.model.mayavi_scene,
+                plane_orientation=axis + '_axes',
+            )
+            ipw.module_manager.scalar_lut_manager.lut_mode = 'gray'
+            ipw.visible = False
+            setattr(self, 'ipw_' + axis, ipw)
 
         self._setup_volume()
 
@@ -219,13 +198,6 @@ class VolumeRenderer(HasTraits):
             vp.set_color(ctf)
             self.volume._update_ctf_fired()
 
-    def _set_slicer_ctf(self, ctf, otf):
-        if self.ipw_z is not None:
-            lut = vtk_lut_from_ctf(ctf, otf)
-            lut.range = np.array([self.vmin, self.vmax])
-            self.ipw_z.ipw.lookup_table = lut
-            self.ipw_z.render()
-
     @on_trait_change('histogram_bins,volume_data')
     def _new_histogram(self):
         if (self.histogram_bins > 0 and
@@ -236,3 +208,25 @@ class VolumeRenderer(HasTraits):
                                                      density=False)
         else:
             self.ctf_editor.histogram = None
+
+    def _slicer_alpha_changed(self, alpha):
+        for ipw in (self.ipw_x, self.ipw_y, self.ipw_z):
+            if ipw is not None:
+                ipw.ipw.texture_plane_property.opacity = alpha
+                ipw.render()
+
+    @on_trait_change('cut_brightness,cut_contrast,ipw_z,volume_data')
+    def _on_cut_brightness_contrast(self):
+        if self.ipw_z is not None:
+            # This is shared between all three.
+            lut_manager = self.ipw_x.module_manager.scalar_lut_manager
+            lut_manager.use_default_range = False
+            data_low, data_high = lut_manager.default_data_range
+            data_level = (data_low + data_high) / 2.0
+            data_radius = (data_high - data_low) / 2.0
+            level = data_level - data_radius*self.cut_brightness
+            radius = data_radius * pow(2, -self.cut_contrast)
+            lut_manager.data_range = (level - radius, level + radius)
+            for ipw in (self.ipw_x, self.ipw_y, self.ipw_z):
+                if ipw is not None:
+                    ipw.render()
