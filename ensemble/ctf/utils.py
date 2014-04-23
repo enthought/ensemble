@@ -12,14 +12,22 @@ from ensemble.ctf.piecewise import PiecewiseFunction
 def build_function_to_screen(component):
     def func(pos):
         bounds = component.bounds
-        return tuple([clip_to_unit(z) * size for z, size in zip(pos, bounds)])
+        padding_left_bottom = [component.padding_left,
+                               component.padding_bottom]
+        return tuple([clip_to_unit(z) * size + padding
+                      for z, size, padding in
+                      zip(pos, bounds, padding_left_bottom)])
     return func
 
 
 def build_screen_to_function(component):
     def func(pos):
         bounds = component.bounds
-        return tuple([clip_to_unit(z / size) for z, size in zip(pos, bounds)])
+        padding_left_bottom = [component.padding_left,
+                               component.padding_bottom]
+        return tuple([clip_to_unit((z - padding) / size)
+                      for z, size, padding in
+                      zip(pos, bounds, padding_left_bottom)])
     return func
 
 
