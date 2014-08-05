@@ -107,6 +107,17 @@ class VolumeRenderer(HasTraits):
         interactor = self.model.scene.interactor
         interactor.interactor_style = tvtk.InteractorStyleTerrain()
 
+        # Add some axes
+        bounds = self.volume.actors[0].bounds
+        cube_axes = tvtk.CubeAxesActor(
+            bounds=bounds,
+            camera=self.model.camera,
+            tick_location='outside',
+            x_title='', y_title='', z_title='',
+            x_units='', y_units='', z_units='',
+        )
+        self.model.renderer.add_actor(cube_axes)
+
     #--------------------------------------------------------------------------
     # Private methods
     #--------------------------------------------------------------------------
