@@ -57,7 +57,7 @@ def rescale_uint8(array):
 def show_volume(volume):
     app = QtApplication()
     volume_data = VolumeData(data=volume)
-    renderer = VolumeRenderer(volume_data=volume_data)
+    renderer = VolumeRenderer(volume_data=volume_data, histogram_bins=256)
     win = VolumeRendererWindow(renderer=renderer)
     win.show()
     app.start()
