@@ -3,7 +3,8 @@ import numpy as np
 from mayavi.core.ui.api import MlabSceneModel
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import CInt, HasTraits, Instance, List, on_trait_change
+from traits.api import (Bool, CInt, Float, HasTraits, Instance, List, Tuple,
+                        on_trait_change)
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
@@ -12,6 +13,8 @@ from ensemble.volren.volume_3d import Volume3D, volume3d
 from ensemble.volren.volume_data import VolumeData
 
 CLIP_MAX = 512
+
+FloatPair = Tuple(Float, Float)
 
 
 class VolumeRenderer(HasTraits):
@@ -40,6 +43,12 @@ class VolumeRenderer(HasTraits):
     # Whether to show the histogram on the CTF editor.
     histogram_bins = CInt(0)
 
+    # What are the physical value ranges for each axis?
+    visible_axis_ranges = Tuple(FloatPair, FloatPair, FloatPair)
+
+    # Which axes should have a scale shown?
+    visible_axis_scales = Tuple(Bool, Bool, Bool)
+
     #--------------------------------------------------------------------------
     # Default values
     #--------------------------------------------------------------------------
@@ -50,6 +59,12 @@ class VolumeRenderer(HasTraits):
     def _ctf_editor_default(self):
         return CtfEditor(prompt_color_selection=get_color,
                          prompt_file_selection=get_filename)
+
+    def _visible_axis_ranges_default(self):
+        return ((0.0, 1.0), (0.0, 1.0), (0.0, 1.0))
+
+    def _visible_axis_scales_default(self):
+        return (False, False, False)
 
     #--------------------------------------------------------------------------
     # Traits notifications
@@ -109,12 +124,21 @@ class VolumeRenderer(HasTraits):
 
         # Add some axes
         bounds = self.volume.actors[0].bounds
+        x_vis, y_vis, z_vis = self.visible_axis_scales
+        x_range, y_range, z_range = self.visible_axis_ranges
         cube_axes = tvtk.CubeAxesActor(
             bounds=bounds,
             camera=self.model.camera,
             tick_location='outside',
-            x_title='', y_title='', z_title='',
-            x_units='', y_units='', z_units='',
+            x_title='', x_units='',
+            y_title='', y_units='',
+            z_title='', z_units='',
+            x_axis_visibility=x_vis,
+            y_axis_visibility=y_vis,
+            z_axis_visibility=z_vis,
+            x_axis_range=x_range,
+            y_axis_range=y_range,
+            z_axis_range=z_range,
         )
         self.model.renderer.add_actor(cube_axes)
 
