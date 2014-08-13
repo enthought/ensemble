@@ -43,6 +43,9 @@ class VolumeRenderer(HasTraits):
     # Whether to show the histogram on the CTF editor.
     histogram_bins = CInt(0)
 
+    # Should the bounding box of the data be shown?
+    show_outline = Bool(True)
+
     # What are the physical value ranges for each axis?
     visible_axis_ranges = Tuple(FloatPair, FloatPair, FloatPair)
 
@@ -122,29 +125,45 @@ class VolumeRenderer(HasTraits):
         interactor = self.model.scene.interactor
         interactor.interactor_style = tvtk.InteractorStyleTerrain()
 
-        # Add some axes
-        bounds = self.volume.actors[0].bounds
-        x_vis, y_vis, z_vis = self.visible_axis_scales
-        x_range, y_range, z_range = self.visible_axis_ranges
-        cube_axes = tvtk.CubeAxesActor(
-            bounds=bounds,
-            camera=self.model.camera,
-            tick_location='outside',
-            x_title='', x_units='',
-            y_title='', y_units='',
-            z_title='', z_units='',
-            x_axis_visibility=x_vis,
-            y_axis_visibility=y_vis,
-            z_axis_visibility=z_vis,
-            x_axis_range=x_range,
-            y_axis_range=y_range,
-            z_axis_range=z_range,
-        )
-        self.model.renderer.add_actor(cube_axes)
+        # Add some addition actors to the scene
+        self._add_axis_actors()
 
     #--------------------------------------------------------------------------
     # Private methods
     #--------------------------------------------------------------------------
+
+    def _add_axis_actors(self):
+        # Some axes with ticks
+        if any(self.visible_axis_scales):
+            bounds = self.volume.actors[0].bounds
+            x_vis, y_vis, z_vis = self.visible_axis_scales
+            x_range, y_range, z_range = self.visible_axis_ranges
+            cube_axes = tvtk.CubeAxesActor(
+                bounds=bounds,
+                camera=self.model.camera,
+                tick_location='outside',
+                x_title='', x_units='',
+                y_title='', y_units='',
+                z_title='', z_units='',
+                x_axis_visibility=x_vis,
+                y_axis_visibility=y_vis,
+                z_axis_visibility=z_vis,
+                x_axis_range=x_range,
+                y_axis_range=y_range,
+                z_axis_range=z_range,
+            )
+            self.model.renderer.add_actor(cube_axes)
+
+        # An outline of the bounds of the data
+        if self.show_outline:
+            outline = tvtk.OutlineFilter(
+                input=self.volume_data.resampled_image_data
+            )
+            outline_mapper = tvtk.PolyDataMapper(
+                input=outline.output
+            )
+            outline_actor = tvtk.Actor(mapper=outline_mapper)
+            self.model.renderer.add_actor(outline_actor)
 
     def _setup_volume(self):
         self.volume.volume_mapper.trait_set(sample_distance=0.2)
