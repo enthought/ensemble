@@ -3,7 +3,7 @@ import numpy as np
 from mayavi.core.ui.api import MlabSceneModel
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import CInt, Float, HasTraits, Instance, List, on_trait_change
+from traits.api import CInt, HasTraits, Instance, List, on_trait_change
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
@@ -11,7 +11,7 @@ from ensemble.ctf.gui_utils import get_color, get_filename
 from ensemble.volren.volume_3d import Volume3D, volume3d
 from ensemble.volren.volume_data import VolumeData
 
-CLIP_MAX = 100
+CLIP_MAX = 512
 
 
 class VolumeRenderer(HasTraits):
@@ -32,7 +32,7 @@ class VolumeRenderer(HasTraits):
     vmax = CInt(255)
 
     # Clip plane positions
-    clip_bounds = List(Float)
+    clip_bounds = List(CInt)
 
     # The transfer function editor
     ctf_editor = Instance(CtfEditor)
@@ -114,6 +114,7 @@ class VolumeRenderer(HasTraits):
     def _setup_volume(self):
         self.volume.volume_mapper.trait_set(sample_distance=0.2)
         self.volume.volume_property.trait_set(shade=False)
+        self._set_volume_clip_planes()
         self.ctf_updated()
 
     def _set_volume_clip_planes(self):

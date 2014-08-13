@@ -6,7 +6,7 @@ from traits_enaml.widgets.mayavi_canvas import MayaviCanvas
 
 enamldef _ClipPlaneSlider(DualSlider):
     minimum = 0
-    maximum = 100
+    maximum = 512
 
 
 enamldef VolumeRenderClip(Form):
@@ -15,18 +15,18 @@ enamldef VolumeRenderClip(Form):
     Label: x_clip_label:
         text = 'X Clip'
     _ClipPlaneSlider: x_clipper:
-        low_value >> renderer.clip_bounds[0]
-        high_value >> renderer.clip_bounds[1]
+        low_value := renderer.clip_bounds[0]
+        high_value := renderer.clip_bounds[1]
     Label: y_clip_label:
         text = 'Y Clip'
     _ClipPlaneSlider: y_clipper:
-        low_value >> renderer.clip_bounds[2]
-        high_value >> renderer.clip_bounds[3]
+        low_value := renderer.clip_bounds[2]
+        high_value := renderer.clip_bounds[3]
     Label: z_clip_label:
         text = 'Z Clip'
     _ClipPlaneSlider: z_clipper:
-        low_value >> renderer.clip_bounds[4]
-        high_value >> renderer.clip_bounds[5]
+        low_value := renderer.clip_bounds[4]
+        high_value := renderer.clip_bounds[5]
 
 
 enamldef VolumeRenderView(Container):
