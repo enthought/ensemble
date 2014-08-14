@@ -49,6 +49,9 @@ class VolumeRenderer(HasTraits):
     # If True, draw an outline of the volume's bounding box
     show_outline = Bool(True)
 
+    # If True, show the minor tick marks on the CubeAxesActor
+    show_axis_minor_ticks = Bool(False)
+
     # What are the physical value ranges for each axis?
     visible_axis_ranges = Tuple(FloatPair, FloatPair, FloatPair)
 
@@ -155,6 +158,9 @@ class VolumeRenderer(HasTraits):
                 x_axis_range=x_range,
                 y_axis_range=y_range,
                 z_axis_range=z_range,
+                x_axis_minor_tick_visibility=self.show_axis_minor_ticks,
+                y_axis_minor_tick_visibility=self.show_axis_minor_ticks,
+                z_axis_minor_tick_visibility=self.show_axis_minor_ticks,
             )
             self.model.renderer.add_actor(cube_axes)
 
@@ -167,6 +173,7 @@ class VolumeRenderer(HasTraits):
                 input=outline.output
             )
             outline_actor = tvtk.Actor(mapper=outline_mapper)
+            outline_actor.property.opacity = 0.3
             self.model.renderer.add_actor(outline_actor)
 
     def _setup_camera(self):
