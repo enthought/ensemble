@@ -43,7 +43,10 @@ class VolumeRenderer(HasTraits):
     # Whether to show the histogram on the CTF editor.
     histogram_bins = CInt(0)
 
-    # Should the bounding box of the data be shown?
+    # If True, the Z-axis points down
+    flip_z = Bool(False)
+
+    # If True, draw an outline of the volume's bounding box
     show_outline = Bool(True)
 
     # What are the physical value ranges for each axis?
@@ -118,7 +121,14 @@ class VolumeRenderer(HasTraits):
         self.volume = volume3d(sf, figure=self.model.mayavi_scene)
         self._setup_volume()
 
-        self.model.mlab.view(40, 50)
+        if self.flip_z:
+            view_up = (0, 0, -1)
+            elevation = 100
+        else:
+            view_up = (0, 0, 1)
+            elevation = 80
+        self.model.mlab.view(40, elevation)
+        self.model.camera.view_up = view_up
         self.model.scene.background = (0, 0, 0)
 
         # Keep the view always pointing up
