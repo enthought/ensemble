@@ -115,34 +115,28 @@ class VolumeRenderer(HasTraits):
 
     @on_trait_change('model.activated')
     def display_model(self):
+        # Add the volume to the scene
         sf = add_dataset(self.volume_data.resampled_image_data,
                          figure=self.model.mayavi_scene)
         self.volume_data_source = sf
         self.volume = volume3d(sf, figure=self.model.mayavi_scene)
         self._setup_volume()
 
-        if self.flip_z:
-            view_up = (0, 0, -1)
-            elevation = 100
-        else:
-            view_up = (0, 0, 1)
-            elevation = 80
-        self.model.mlab.view(40, elevation)
-        self.model.camera.view_up = view_up
+        # Add some additional actors to the scene
+        self._add_additional_actors()
+
+        self._setup_camera()
         self.model.scene.background = (0, 0, 0)
 
         # Keep the view always pointing up
         interactor = self.model.scene.interactor
         interactor.interactor_style = tvtk.InteractorStyleTerrain()
 
-        # Add some addition actors to the scene
-        self._add_axis_actors()
-
     #--------------------------------------------------------------------------
     # Private methods
     #--------------------------------------------------------------------------
 
-    def _add_axis_actors(self):
+    def _add_additional_actors(self):
         # Some axes with ticks
         if any(self.visible_axis_scales):
             bounds = self.volume.actors[0].bounds
@@ -174,6 +168,16 @@ class VolumeRenderer(HasTraits):
             )
             outline_actor = tvtk.Actor(mapper=outline_mapper)
             self.model.renderer.add_actor(outline_actor)
+
+    def _setup_camera(self):
+        if self.flip_z:
+            view_up = (0, 0, -1)
+            elevation = 100
+        else:
+            view_up = (0, 0, 1)
+            elevation = 80
+        self.model.mlab.view(40, elevation)
+        self.model.camera.view_up = view_up
 
     def _setup_volume(self):
         self.volume.volume_mapper.trait_set(sample_distance=0.2)
