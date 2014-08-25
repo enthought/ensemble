@@ -59,6 +59,25 @@ class VolumeRenderer(HasTraits):
     visible_axis_scales = Tuple(Bool, Bool, Bool)
 
     #--------------------------------------------------------------------------
+    # Public interface
+    #--------------------------------------------------------------------------
+
+    def screenshot(self):
+        """ Returns an image of the rendered volume. The image will be the same
+        size as the window on screen.
+        """
+        render_window = self.model.render_window
+        x, y = render_window.size
+
+        data = tvtk.UnsignedCharArray()
+        render_window.get_pixel_data(0, 0, x - 1, y - 1, 1, data)
+        data_array = data.to_array().copy()
+        data_array.shape = (y, x, 3)
+        data_array = np.flipud(data_array)
+
+        return data_array
+
+    #--------------------------------------------------------------------------
     # Default values
     #--------------------------------------------------------------------------
 
