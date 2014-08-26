@@ -32,6 +32,9 @@ enamldef MainView(Container): view:
         self.view, _ = self.parse_and_create(enaml_source,
                                              renderer=self.renderer)
 
+        with self.event_loop():
+            self.view.show()
+
     def tearDown(self):
         self.view = None
         self.renderer = None
@@ -40,6 +43,10 @@ enamldef MainView(Container): view:
     def test_renderer_initialized(self):
         self.assertTrue(self.renderer.volume is not None)
 
+    def test_renderer_screenshot(self):
+        image_array = self.renderer.screenshot()
+        self.assertTrue(image_array.ndim == 3)
+        self.assertTrue(image_array.shape[-1] == 3)
 
 if __name__ == "__main__":
     unittest.main()
