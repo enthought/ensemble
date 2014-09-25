@@ -3,7 +3,7 @@ from traits.api import Event, Instance, Tuple, Type
 
 from ensemble.ctf.piecewise import PiecewiseFunction
 from ensemble.ctf.utils import (FunctionUIAdapter, AlphaFunctionUIAdapter,
-                                ColorFunctionUIAdapter, clip_to_unit)
+                                ColorFunctionUIAdapter, clip, clip_to_unit)
 
 
 class ValueMapper(object):
@@ -94,9 +94,10 @@ class AlphaFunctionEditorTool(FunctionEditorTool):
             value_at = self.function.value_at
             x_limits = tuple([value_at(i)[0] for i in (index-1, index+1)])
 
-        x_val = min(max(x_limits[0], start_value[0] + delta_x), x_limits[1])
-        new_value = (x_val, start_value[1] + delta_y)
-        self.function.update(index, new_value)
+        x = clip(start_value[0] + delta_x, x_limits)
+        y = clip_to_unit(start_value[1] + delta_y)
+
+        self.function.update(index, (x, y))
         self.function_updated = True
 
 
@@ -117,7 +118,7 @@ class ColorFunctionEditorTool(FunctionEditorTool):
             value_at = self.function.value_at
             x_limits = tuple([value_at(i)[0] for i in (index-1, index+1)])
 
-        x_pos = min(max(x_limits[0], start_value[0] + delta_x), x_limits[1])
+        x_pos = clip(start_value[0] + delta_x, x_limits)
         new_value = (x_pos,) + start_value[1:]
         self.function.update(index, new_value)
         self.function_updated = True
