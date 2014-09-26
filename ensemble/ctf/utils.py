@@ -32,7 +32,12 @@ def build_screen_to_function(component):
 
 
 def clip_to_unit(value):
-    return min(max(value, 0.0), 1.0)
+    return clip(value, (0.0, 1.0))
+
+
+def clip(value, limits):
+    v_min, v_max = limits
+    return min(max(value, v_min), v_max)
 
 
 def point_dist(pos0, pos1):
