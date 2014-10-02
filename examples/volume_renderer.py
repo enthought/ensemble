@@ -1,10 +1,10 @@
 """
-Example of displaying a volume using the volume renderer.
+Example of displaying a volume using the volume viewer.
 
 This example creates a simple example volume with nested cylinders and a bit
 of noise. The color bar on the bottom displays the transfer function that maps
 values in the data to a color and opacity. Right click on the color bar to
-alter the renderer's transfer function:
+alter the viewer's transfer function:
 
     * Add Color: Add a slider to control the color of intensity values.
     * Add Opacity: Adds a control point to adjust the shape of the
@@ -17,10 +17,10 @@ from enaml.qt.qt_application import QtApplication
 import traits_enaml
 
 from ensemble.volren.volume_data import VolumeData
-from ensemble.volren.volume_renderer import VolumeRenderer
+from ensemble.volren.volume_viewer import VolumeViewer
 
 with traits_enaml.imports():
-    from volume_renderer_window import VolumeRendererWindow
+    from volume_viewer_window import VolumeViewerWindow
 
 
 def main():
@@ -56,9 +56,9 @@ def rescale_uint8(array):
 
 def show_volume(volume):
     app = QtApplication()
-    volume_data = VolumeData(data=volume)
-    renderer = VolumeRenderer(volume_data=volume_data, histogram_bins=256)
-    win = VolumeRendererWindow(renderer=renderer)
+    volume_data = VolumeData(raw_data=volume)
+    viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256)
+    win = VolumeViewerWindow(viewer=viewer)
     win.show()
     app.start()
 
