@@ -1,18 +1,17 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import Bool, CInt, Float, HasTraits, Instance, List, Tuple
+from traits.api import CInt, Instance, List
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
 from .volume_3d import Volume3D, volume3d
 from .volume_data import VolumeData
+from .volume_scene_member import ABCVolumeSceneMember
 
 CLIP_MAX = 512
 
-FloatPair = Tuple(Float, Float)
 
-
-class VolumeRenderer(HasTraits):
+class VolumeRenderer(ABCVolumeSceneMember):
     # The data to plot
     data = Instance(VolumeData)
 
@@ -33,33 +32,20 @@ class VolumeRenderer(HasTraits):
     # Clip plane positions
     clip_bounds = List(CInt)
 
-    # If True, draw an outline of the volume's bounding box
-    show_outline = Bool(True)
+    # -------------------------------------------------------------------------
+    # ABCVolumeSceneMember interface
+    # -------------------------------------------------------------------------
 
-    # If True, show the minor tick marks on the CubeAxesActor
-    show_axis_minor_ticks = Bool(False)
-
-    # What are the physical value ranges for each axis?
-    visible_axis_ranges = Tuple(FloatPair, FloatPair, FloatPair)
-
-    # Which axes should have a scale shown?
-    visible_axis_scales = Tuple(Bool, Bool, Bool)
-
-    #--------------------------------------------------------------------------
-    # Public interface
-    #--------------------------------------------------------------------------
-
-    def initialize_actors(self, scene_model):
-        """ Add actors to the scene.
-        """
+    def add_actors_to_scene(self, scene_model):
         sf = add_dataset(self.data.resampled_image_data,
                          figure=scene_model.mayavi_scene)
         self.data_source = sf
         self.volume = volume3d(sf, figure=scene_model.mayavi_scene)
         self._setup_volume()
 
-        # Add some additional actors to the scene
-        self._add_additional_actors(scene_model)
+    # -------------------------------------------------------------------------
+    # Public interface
+    # -------------------------------------------------------------------------
 
     def set_transfer_function(self, colors=None, opacities=None):
         """ Update the volume mapper's transfer function.
@@ -88,22 +74,16 @@ class VolumeRenderer(HasTraits):
 
         self._set_volume_ctf(ctf, otf)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Default values
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _clip_bounds_default(self):
         return [0, CLIP_MAX, 0, CLIP_MAX, 0, CLIP_MAX]
 
-    def _visible_axis_ranges_default(self):
-        return ((0.0, 1.0), (0.0, 1.0), (0.0, 1.0))
-
-    def _visible_axis_scales_default(self):
-        return (False, False, False)
-
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Traits notifications
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _data_changed(self):
         self.vmin = self.data.raw_data.min()
@@ -118,46 +98,9 @@ class VolumeRenderer(HasTraits):
     def _clip_bounds_changed(self):
         self._set_volume_clip_planes()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Private methods
-    #--------------------------------------------------------------------------
-
-    def _add_additional_actors(self, scene_model):
-        # Some axes with ticks
-        if any(self.visible_axis_scales):
-            bounds = self.volume.actors[0].bounds
-            x_vis, y_vis, z_vis = self.visible_axis_scales
-            x_range, y_range, z_range = self.visible_axis_ranges
-            cube_axes = tvtk.CubeAxesActor(
-                bounds=bounds,
-                camera=scene_model.camera,
-                tick_location='outside',
-                x_title='', x_units='',
-                y_title='', y_units='',
-                z_title='', z_units='',
-                x_axis_visibility=x_vis,
-                y_axis_visibility=y_vis,
-                z_axis_visibility=z_vis,
-                x_axis_range=x_range,
-                y_axis_range=y_range,
-                z_axis_range=z_range,
-                x_axis_minor_tick_visibility=self.show_axis_minor_ticks,
-                y_axis_minor_tick_visibility=self.show_axis_minor_ticks,
-                z_axis_minor_tick_visibility=self.show_axis_minor_ticks,
-            )
-            scene_model.renderer.add_actor(cube_axes)
-
-        # An outline of the bounds of the data
-        if self.show_outline:
-            outline = tvtk.OutlineFilter(
-                input=self.data.resampled_image_data
-            )
-            outline_mapper = tvtk.PolyDataMapper(
-                input=outline.output
-            )
-            outline_actor = tvtk.Actor(mapper=outline_mapper)
-            outline_actor.property.opacity = 0.3
-            scene_model.renderer.add_actor(outline_actor)
+    # -------------------------------------------------------------------------
 
     def _setup_volume(self):
         self.volume.volume_mapper.trait_set(sample_distance=0.2)

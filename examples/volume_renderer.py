@@ -16,6 +16,7 @@ import numpy as np
 from enaml.qt.qt_application import QtApplication
 import traits_enaml
 
+from ensemble.volren.volume_bounding_box import VolumeBoundingBox
 from ensemble.volren.volume_data import VolumeData
 from ensemble.volren.volume_viewer import VolumeViewer
 
@@ -57,7 +58,9 @@ def rescale_uint8(array):
 def show_volume(volume):
     app = QtApplication()
     volume_data = VolumeData(raw_data=volume)
-    viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256)
+    scene_members = [VolumeBoundingBox()]
+    viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256,
+                          scene_members=scene_members)
     win = VolumeViewerWindow(viewer=viewer)
     win.show()
     app.start()

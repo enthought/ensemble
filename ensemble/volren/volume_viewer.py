@@ -1,18 +1,16 @@
 import numpy as np
 
 from mayavi.core.ui.api import MlabSceneModel
-from traits.api import (Bool, CInt, Float, HasTraits, Instance, List, Tuple,
-                        on_trait_change)
+from traits.api import Bool, CInt, HasTraits, Instance, List, on_trait_change
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
 from ensemble.ctf.gui_utils import get_color, get_filename
 from .volume_data import VolumeData
 from .volume_renderer import VolumeRenderer
+from .volume_scene_member import ABCVolumeSceneMember
 
 CLIP_MAX = 512
-
-FloatPair = Tuple(Float, Float)
 
 
 class VolumeViewer(HasTraits):
@@ -37,21 +35,12 @@ class VolumeViewer(HasTraits):
     # If True, the Z-axis points down
     flip_z = Bool(False)
 
-    # If True, draw an outline of the volume's bounding box
-    show_outline = Bool(True)
+    # Additional members of the scene
+    scene_members = List(Instance(ABCVolumeSceneMember))
 
-    # If True, show the minor tick marks on the CubeAxesActor
-    show_axis_minor_ticks = Bool(False)
-
-    # What are the physical value ranges for each axis?
-    visible_axis_ranges = Tuple(FloatPair, FloatPair, FloatPair)
-
-    # Which axes should have a scale shown?
-    visible_axis_scales = Tuple(Bool, Bool, Bool)
-
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Public interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def screenshot(self):
         """ Returns an image of the rendered volume. The image will be the same
@@ -68,9 +57,9 @@ class VolumeViewer(HasTraits):
 
         return data_array
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Default values
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _clip_bounds_default(self):
         return [0, CLIP_MAX, 0, CLIP_MAX, 0, CLIP_MAX]
@@ -78,25 +67,15 @@ class VolumeViewer(HasTraits):
     def _volume_renderer_default(self):
         return VolumeRenderer(data=self.volume_data,
                               colors=self.ctf_editor.colors,
-                              opacities=self.ctf_editor.opacities,
-                              show_outline=self.show_outline,
-                              show_axis_minor_ticks=self.show_axis_minor_ticks,
-                              visible_axis_ranges=self.visible_axis_ranges,
-                              visible_axis_scales=self.visible_axis_scales)
+                              opacities=self.ctf_editor.opacities)
 
     def _ctf_editor_default(self):
         return CtfEditor(prompt_color_selection=get_color,
                          prompt_file_selection=get_filename)
 
-    def _visible_axis_ranges_default(self):
-        return ((0.0, 1.0), (0.0, 1.0), (0.0, 1.0))
-
-    def _visible_axis_scales_default(self):
-        return (False, False, False)
-
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Traits notifications
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _volume_data_changed(self):
         self.volume_renderer.data = self.volume_data
@@ -109,14 +88,18 @@ class VolumeViewer(HasTraits):
         set_ctf = self.volume_renderer.set_transfer_function
         set_ctf(self.ctf_editor.colors, self.ctf_editor.opacities)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Scene activation callbacks
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     @on_trait_change('model.activated')
     def display_model(self):
         # Add the volume to the scene
-        self.volume_renderer.initialize_actors(self.model)
+        self.volume_renderer.add_actors_to_scene(self.model)
+
+        # Add the other members to the scene
+        for member in self.scene_members:
+            member.add_actors_to_scene(self.model)
 
         self._setup_camera()
         self.model.scene.background = (0, 0, 0)
@@ -125,9 +108,9 @@ class VolumeViewer(HasTraits):
         interactor = self.model.scene.interactor
         interactor.interactor_style = tvtk.InteractorStyleTerrain()
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Private methods
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _setup_camera(self):
         if self.flip_z:
