@@ -5,10 +5,10 @@ import numpy as np
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 
 from ensemble.volren.volume_data import VolumeData
-from ensemble.volren.volume_renderer import VolumeRenderer
+from ensemble.volren.volume_viewer import VolumeViewer
 
 
-class VolumeRendererTestCase(EnamlTestAssistant, unittest.TestCase):
+class VolumeViewerTestCase(EnamlTestAssistant, unittest.TestCase):
 
     def setUp(self):
 
@@ -16,35 +16,35 @@ class VolumeRendererTestCase(EnamlTestAssistant, unittest.TestCase):
 
         enaml_source = """
 from enaml.widgets.api import Container
-from ensemble.volren.volume_render_view import VolumeRenderView
+from ensemble.volren.volume_viewer_ui import VolumeViewerContainer
 
 enamldef MainView(Container): view:
-    attr renderer
+    attr viewer
 
-    VolumeRenderView:
-        renderer << view.renderer
+    VolumeViewerContainer:
+        viewer << view.viewer
 
 """
         volume = np.random.normal(size=(32, 32, 32))
         volume = (255*(volume-volume.min())/volume.ptp()).astype(np.uint8)
-        volume_data = VolumeData(data=volume)
-        self.renderer = VolumeRenderer(volume_data=volume_data)
+        volume_data = VolumeData(raw_data=volume)
+        self.viewer = VolumeViewer(volume_data=volume_data)
         self.view, _ = self.parse_and_create(enaml_source,
-                                             renderer=self.renderer)
+                                             viewer=self.viewer)
 
         with self.event_loop():
             self.view.show()
 
     def tearDown(self):
         self.view = None
-        self.renderer = None
+        self.viewer = None
         EnamlTestAssistant.tearDown(self)
 
     def test_renderer_initialized(self):
-        self.assertTrue(self.renderer.volume is not None)
+        self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
     def test_renderer_screenshot(self):
-        image_array = self.renderer.screenshot()
+        image_array = self.viewer.screenshot()
         self.assertTrue(image_array.ndim == 3)
         self.assertTrue(image_array.shape[-1] == 3)
 
