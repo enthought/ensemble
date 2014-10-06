@@ -1,17 +1,16 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import CInt, Instance, List, Property
+from traits.api import HasStrictTraits, CInt, Instance, List, Property
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
 from .volume_3d import Volume3D, volume3d
 from .volume_data import VolumeData
-from .volume_scene_member import ABCVolumeSceneMember
 
 CLIP_MAX = 512
 
 
-class VolumeRenderer(ABCVolumeSceneMember):
+class VolumeRenderer(HasStrictTraits):
     # The data to plot
     data = Instance(VolumeData)
 
@@ -36,19 +35,15 @@ class VolumeRenderer(ABCVolumeSceneMember):
     clip_bounds = List(CInt)
 
     # -------------------------------------------------------------------------
-    # ABCVolumeSceneMember interface
+    # Public interface
     # -------------------------------------------------------------------------
 
-    def add_actors_to_scene(self, scene_model, volume_actor):
+    def add_volume_to_scene(self, scene_model):
         source = add_dataset(self.data.resampled_image_data,
                              figure=scene_model.mayavi_scene)
         self.data_source = source
         self.volume = volume3d(source, figure=scene_model.mayavi_scene)
         self._setup_volume()
-
-    # -------------------------------------------------------------------------
-    # Public interface
-    # -------------------------------------------------------------------------
 
     def set_transfer_function(self, colors=None, opacities=None):
         """ Update the volume mapper's transfer function.
