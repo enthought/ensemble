@@ -12,14 +12,10 @@ class VolumeBoundingBox(ABCVolumeSceneMember):
     # ABCVolumeSceneMember interface
     #--------------------------------------------------------------------------
 
-    def add_actors_to_scene(self, scene_model):
-
-        actor = self.find_volume_actor(scene_model)
-        if actor is None:
-            return
+    def add_actors_to_scene(self, scene_model, volume_actor):
 
         # An outline of the bounds of the Volume actor's data
-        outline = tvtk.OutlineFilter(input=actor.mapper.input)
+        outline = tvtk.OutlineFilter(input=volume_actor.mapper.input)
         outline_mapper = tvtk.PolyDataMapper(input=outline.output)
         outline_actor = tvtk.Actor(mapper=outline_mapper)
         outline_actor.property.opacity = 0.3

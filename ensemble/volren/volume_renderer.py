@@ -1,6 +1,6 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import CInt, Instance, List
+from traits.api import CInt, Instance, List, Property
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
@@ -21,6 +21,9 @@ class VolumeRenderer(ABCVolumeSceneMember):
     # The mayavi volume renderer object
     volume = Instance(Volume3D)
 
+    # The tvtk.Actor for `volume`
+    actor = Property(Instance(tvtk.Actor), depends_on='volume')
+
     # The minimum and maximum displayed intensity values.
     vmin = CInt(0)
     vmax = CInt(255)
@@ -36,11 +39,11 @@ class VolumeRenderer(ABCVolumeSceneMember):
     # ABCVolumeSceneMember interface
     # -------------------------------------------------------------------------
 
-    def add_actors_to_scene(self, scene_model):
-        sf = add_dataset(self.data.resampled_image_data,
-                         figure=scene_model.mayavi_scene)
-        self.data_source = sf
-        self.volume = volume3d(sf, figure=scene_model.mayavi_scene)
+    def add_actors_to_scene(self, scene_model, volume_actor):
+        source = add_dataset(self.data.resampled_image_data,
+                             figure=scene_model.mayavi_scene)
+        self.data_source = source
+        self.volume = volume3d(source, figure=scene_model.mayavi_scene)
         self._setup_volume()
 
     # -------------------------------------------------------------------------
@@ -57,11 +60,11 @@ class VolumeRenderer(ABCVolumeSceneMember):
         if opacities is not None:
             self.opacities = opacities
 
-        ctf = tvtk.ColorTransferFunction()
+        color_tf = tvtk.ColorTransferFunction()
         for color in self.colors.items():
-            ctf.add_rgb_point(lerp(color[0]), *(color[1:]))
+            color_tf.add_rgb_point(lerp(color[0]), *(color[1:]))
 
-        otf = tvtk.PiecewiseFunction()
+        opacity_tf = tvtk.PiecewiseFunction()
         alphas = self.opacities.items()
         for i, alpha in enumerate(alphas):
             x = alpha[0]
@@ -70,20 +73,16 @@ class VolumeRenderer(ABCVolumeSceneMember):
                 # we need to jog a value that is exactly equal by a little bit.
                 if alphas[i-1][0] == alpha[0]:
                     x += 1e-8
-            otf.add_point(lerp(x), alpha[1])
+            opacity_tf.add_point(lerp(x), alpha[1])
 
-        self._set_volume_ctf(ctf, otf)
+        self._set_volume_ctf(color_tf, opacity_tf)
 
     # -------------------------------------------------------------------------
-    # Default values
+    # Traits bits
     # -------------------------------------------------------------------------
 
     def _clip_bounds_default(self):
         return [0, CLIP_MAX, 0, CLIP_MAX, 0, CLIP_MAX]
-
-    # -------------------------------------------------------------------------
-    # Traits notifications
-    # -------------------------------------------------------------------------
 
     def _data_changed(self):
         self.vmin = self.data.raw_data.min()
@@ -97,6 +96,9 @@ class VolumeRenderer(ABCVolumeSceneMember):
 
     def _clip_bounds_changed(self):
         self._set_volume_clip_planes()
+
+    def _get_actor(self):
+        return self.volume.actors[0]
 
     # -------------------------------------------------------------------------
     # Private methods
@@ -120,9 +122,9 @@ class VolumeRenderer(ABCVolumeSceneMember):
         # Set them as the clipping planes for the volume mapper
         self.volume.volume.mapper.clipping_planes = planes
 
-    def _set_volume_ctf(self, ctf, otf):
+    def _set_volume_ctf(self, color_tf, opacity_tf):
         if self.volume is not None:
             vp = self.volume.volume_property
-            vp.set_scalar_opacity(otf)
-            vp.set_color(ctf)
+            vp.set_scalar_opacity(opacity_tf)
+            vp.set_color(color_tf)
             self.volume._update_ctf_fired()

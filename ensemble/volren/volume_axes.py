@@ -24,15 +24,11 @@ class VolumeAxes(ABCVolumeSceneMember):
     # ABCVolumeSceneMember interface
     #--------------------------------------------------------------------------
 
-    def add_actors_to_scene(self, scene_model):
-
-        actor = self.find_volume_actor(scene_model)
-        if actor is None:
-            return
+    def add_actors_to_scene(self, scene_model, volume_actor):
 
         # Some axes with ticks
         if any(self.visible_axis_scales):
-            bounds = actor.bounds
+            bounds = volume_actor.bounds
             x_vis, y_vis, z_vis = self.visible_axis_scales
             x_range, y_range, z_range = self.visible_axis_ranges
             cube_axes = tvtk.CubeAxesActor(

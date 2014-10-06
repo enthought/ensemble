@@ -95,11 +95,12 @@ class VolumeViewer(HasTraits):
     @on_trait_change('model.activated')
     def display_model(self):
         # Add the volume to the scene
-        self.volume_renderer.add_actors_to_scene(self.model)
+        self.volume_renderer.add_actors_to_scene(self.model, None)
 
         # Add the other members to the scene
+        volume_actor = self.volume_renderer.actor
         for member in self.scene_members:
-            member.add_actors_to_scene(self.model)
+            member.add_actors_to_scene(self.model, volume_actor)
 
         self._setup_camera()
         self.model.scene.background = (0, 0, 0)
