@@ -1,13 +1,11 @@
-import json
-
 from enable.component import Component
 from enable.tools.pyface.context_menu_tool import ContextMenuTool
 from pyface.action.api import Action, Group, MenuManager, Separator
 from traits.api import Callable, Instance, List, Type
 
-from ensemble.ctf.piecewise import PiecewiseFunction, verify_values
+from ensemble.ctf.piecewise import PiecewiseFunction
 from ensemble.ctf.utils import (FunctionUIAdapter, AlphaFunctionUIAdapter,
-                                ColorFunctionUIAdapter)
+                                ColorFunctionUIAdapter, load_ctf, save_ctf)
 
 
 class BaseCtfAction(Action):
@@ -106,24 +104,13 @@ class LoadFunctionAction(Action):
         if len(filename) == 0:
             return
 
-        with open(filename, 'r') as fp:
-            loaded_data = json.load(fp)
-
-        # Sanity check
-        if not self._verify_loaded_data(loaded_data):
-            return
-
-        parts = (('alpha', self.alpha_func), ('color', self.color_func))
-        for name, func in parts:
-            func.clear()
-            for value in loaded_data[name]:
-                func.insert(tuple(value))
+        color_func, alpha_func = load_ctf(filename)
+        funcs = ((self.alpha_func, alpha_func), (self.color_func, color_func))
+        for dest, source in funcs:
+            dest.clear()
+            for value in source.items():
+                dest.insert(value)
         self.component.update_function()
-
-    def _verify_loaded_data(self, data):
-        keys = ('alpha', 'color')
-        has_values = all(k in data for k in keys)
-        return has_values and all(verify_values(data[k]) for k in keys)
 
 
 class SaveFunctionAction(Action):
@@ -139,11 +126,7 @@ class SaveFunctionAction(Action):
         filename = self.prompt_filename(action='save')
         if len(filename) == 0:
             return
-
-        function = {'alpha': self.alpha_func.values(),
-                    'color': self.color_func.values()}
-        with open(filename, 'w') as fp:
-            json.dump(function, fp, indent=1)
+        save_ctf(self.color_func, self.alpha_func, filename)
 
 
 class FunctionMenuTool(ContextMenuTool):
