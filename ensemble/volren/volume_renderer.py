@@ -1,6 +1,6 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import HasStrictTraits, CInt, Instance, List, Property
+from traits.api import HasStrictTraits, CInt, Enum, Instance, List, Property
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
@@ -8,6 +8,36 @@ from .volume_3d import Volume3D, volume3d
 from .volume_data import VolumeData
 
 CLIP_MAX = 512
+QUALITY_SETTINGS = {
+    'best': {
+        'mapper': {
+            'sample_distance': 0.05,
+        },
+        'property': {
+            'shade': False,
+            'ambient': 0.5,
+            'diffuse': 0.4,
+            'specular': 0.1,
+            'specular_power': 100,
+        }
+    },
+    'default': {
+        'mapper': {
+            'sample_distance': 0.2,
+        },
+        'property': {
+            'shade': False
+        }
+    },
+    'performance': {
+        'mapper': {
+            'sample_distance': 1.0,
+        },
+        'property': {
+            'shade': False
+        }
+    },
+}
 
 
 class VolumeRenderer(HasStrictTraits):
@@ -33,6 +63,9 @@ class VolumeRenderer(HasStrictTraits):
 
     # Clip plane positions
     clip_bounds = List(CInt)
+
+    # Render quality setting
+    render_quality = Enum('performance', QUALITY_SETTINGS.keys())
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -92,6 +125,9 @@ class VolumeRenderer(HasStrictTraits):
     def _clip_bounds_changed(self):
         self._set_volume_clip_planes()
 
+    def _render_quality_changed(self):
+        self._setup_volume()
+
     def _get_actor(self):
         return self.volume.actors[0]
 
@@ -100,8 +136,9 @@ class VolumeRenderer(HasStrictTraits):
     # -------------------------------------------------------------------------
 
     def _setup_volume(self):
-        self.volume.volume_mapper.trait_set(sample_distance=0.2)
-        self.volume.volume_property.trait_set(shade=False)
+        render_settings = QUALITY_SETTINGS[self.render_quality]
+        self.volume.volume_mapper.trait_set(**render_settings['mapper'])
+        self.volume.volume_property.trait_set(**render_settings['property'])
         self._set_volume_clip_planes()
         self.set_transfer_function()
 
