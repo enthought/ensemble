@@ -5,7 +5,7 @@ from traits.api import Bool, CInt, HasTraits, Instance, List, on_trait_change
 from tvtk.api import tvtk
 
 from ensemble.ctf.editor import CtfEditor
-from ensemble.ctf.gui_utils import get_color, get_filename
+from ensemble.ctf.gui_utils import get_color
 from .volume_data import VolumeData
 from .volume_renderer import VolumeRenderer
 from .volume_scene_member import ABCVolumeSceneMember
@@ -70,8 +70,7 @@ class VolumeViewer(HasTraits):
                               opacities=self.ctf_editor.opacities)
 
     def _ctf_editor_default(self):
-        return CtfEditor(prompt_color_selection=get_color,
-                         prompt_file_selection=get_filename)
+        return CtfEditor(prompt_color_selection=get_color)
 
     # -------------------------------------------------------------------------
     # Traits notifications

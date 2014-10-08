@@ -29,11 +29,6 @@ class CtfEditor(Component):
 
     function_updated = Event
 
-    # A callable which prompts the user for a filename.
-    # A single keyword argument 'action' will be passed to the callable and
-    # its value will be 'open' or 'save'. A filename should be returned.
-    prompt_file_selection = Callable
-
     # A callable which prompts the user for a color
     # A single keyword argument 'starting_color' will be passed to the callable
     # and its value will be None or an RGB tuple with values in the range

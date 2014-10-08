@@ -5,7 +5,7 @@ from traits.api import Callable, Instance, List, Type
 
 from ensemble.ctf.piecewise import PiecewiseFunction
 from ensemble.ctf.utils import (FunctionUIAdapter, AlphaFunctionUIAdapter,
-                                ColorFunctionUIAdapter, load_ctf, save_ctf)
+                                ColorFunctionUIAdapter)
 
 
 class BaseCtfAction(Action):
@@ -90,49 +90,12 @@ class RemoveNodeAction(Action):
                 return
 
 
-class LoadFunctionAction(Action):
-    name = 'Load Function...'
-    component = Instance(Component)
-    alpha_func = Instance(PiecewiseFunction)
-    color_func = Instance(PiecewiseFunction)
-
-    # A callable which prompts the user for a filename
-    prompt_filename = Callable
-
-    def perform(self, event):
-        filename = self.prompt_filename(action='open')
-        if len(filename) == 0:
-            return
-
-        color_func, alpha_func = load_ctf(filename)
-        self.alpha_func.update_from_function(alpha_func)
-        self.color_func.update_from_function(color_func)
-        self.component.update_function()
-
-
-class SaveFunctionAction(Action):
-    name = 'Save Function...'
-    component = Instance(Component)
-    alpha_func = Instance(PiecewiseFunction)
-    color_func = Instance(PiecewiseFunction)
-
-    # A callable which prompts the user for a filename
-    prompt_filename = Callable
-
-    def perform(self, event):
-        filename = self.prompt_filename(action='save')
-        if len(filename) == 0:
-            return
-        save_ctf(self.color_func, self.alpha_func, filename)
-
-
 class FunctionMenuTool(ContextMenuTool):
     def _menu_manager_default(self):
         component = self.component
         alpha_func = component.opacities
         color_func = component.colors
         prompt_color = component.prompt_color_selection
-        prompt_filename = component.prompt_file_selection
         return MenuManager(
             Group(
                 AddColorAction(component=component, function=color_func,
@@ -151,15 +114,5 @@ class FunctionMenuTool(ContextMenuTool):
                 RemoveNodeAction(component=component, alpha_func=alpha_func,
                                  color_func=color_func),
                 id='RemoveGroup',
-            ),
-            Separator(),
-            Group(
-                LoadFunctionAction(component=component, alpha_func=alpha_func,
-                                   color_func=color_func,
-                                   prompt_filename=prompt_filename),
-                SaveFunctionAction(component=component, alpha_func=alpha_func,
-                                   color_func=color_func,
-                                   prompt_filename=prompt_filename),
-                id='IOGroup',
             ),
         )

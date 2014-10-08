@@ -2,7 +2,6 @@ from enaml.colors import Color
 import traits_enaml
 
 with traits_enaml.imports():
-    from enaml.widgets.api import FileDialogEx
     from enaml.widgets.color_dialog import ColorDialog
 
 
@@ -24,17 +23,3 @@ def get_color(starting_color=None):
 
     color = ColorDialog.get_color(**dlg_kwargs)
     return None if color is None else color_as_tuple(color)
-
-
-def get_filename(action='save'):
-    """ Show a file dialog to the user and return the path of the file which is
-    selected.
-
-    If no file is selected (because the user cancels the dialog), return an
-    empty string
-    """
-    functions = {
-        'save': FileDialogEx.get_save_file_name,
-        'open': FileDialogEx.get_open_file_name,
-    }
-    return functions[action]()

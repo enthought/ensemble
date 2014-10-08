@@ -12,7 +12,7 @@ ETSConfig.toolkit = 'qt4'
 
 from enaml.qt.qt_application import QtApplication
 from ensemble.ctf.editor import CtfEditor
-from ensemble.ctf.gui_utils import get_color, get_filename
+from ensemble.ctf.gui_utils import get_color
 import traits_enaml
 
 if __name__ == "__main__":
@@ -21,8 +21,7 @@ if __name__ == "__main__":
 
     app = QtApplication()
 
-    ctf = CtfEditor(prompt_color_selection=get_color,
-                    prompt_file_selection=get_filename)
+    ctf = CtfEditor(prompt_color_selection=get_color)
     win = CtfDemoWindow(ctf=ctf)
     win.show()
 

@@ -12,10 +12,6 @@ def get_color(starting_color=None):
     return (0.0, 1.0, 0.0)
 
 
-def get_filename(action='save'):
-    return 'temp.json'
-
-
 class TestEditor(EnamlTestAssistant, EnableTestAssistant, unittest.TestCase):
 
     def setUp(self):
@@ -35,8 +31,7 @@ enamldef MainView(MainWindow):
 """
 
         editor = CtfEditor(bounds=(400, 100),
-                           prompt_color_selection=get_color,
-                           prompt_file_selection=get_filename)
+                           prompt_color_selection=get_color)
         editor.add_function_node(editor.opacities, (0.5, 0.5))
         editor.add_function_node(editor.colors, (0.25, 1.0, 0.0, 0.0))
         self.editor = editor
