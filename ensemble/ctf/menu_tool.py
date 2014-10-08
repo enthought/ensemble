@@ -105,11 +105,8 @@ class LoadFunctionAction(Action):
             return
 
         color_func, alpha_func = load_ctf(filename)
-        funcs = ((self.alpha_func, alpha_func), (self.color_func, color_func))
-        for dest, source in funcs:
-            dest.clear()
-            for value in source.items():
-                dest.insert(value)
+        self.alpha_func.update_from_function(alpha_func)
+        self.color_func.update_from_function(color_func)
         self.component.update_function()
 
 

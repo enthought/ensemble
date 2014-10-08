@@ -47,6 +47,9 @@ class CtfManager(HasStrictTraits):
             The opacity component of the transfer function.
         """
         fn = os.path.join(self.root_dir, name + CTF_EXTENSION)
+        if not os.path.isdir(self.root_dir):
+            os.makedirs(self.root_dir)
+
         save_ctf(color_func, alpha_func, fn)
         self.functions[name] = (color_func.copy(), alpha_func.copy())
         self._update_names()

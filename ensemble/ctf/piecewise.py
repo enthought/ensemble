@@ -13,6 +13,12 @@ class PiecewiseFunction(object):
         self._keys = []
         self._values = []
 
+    def copy(self):
+        cls = type(self)
+        other = cls(key=self.keyfunc)
+        other.update_from_function(self)
+        return other
+
     def insert(self, value):
         key = self.keyfunc(value)
         index = bisect(self._keys, key)
@@ -43,6 +49,11 @@ class PiecewiseFunction(object):
         key = self.keyfunc(value)
         self._keys[index] = key
         self._values[index] = value
+
+    def update_from_function(self, other):
+        self.clear()
+        self._keys = other._keys[:]
+        self._values = other._values[:]
 
     def value_at(self, index):
         return self._values[index]
