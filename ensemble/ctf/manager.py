@@ -1,8 +1,7 @@
-from abc import abstractmethod
 import glob
 import os
 
-from traits.api import ABCHasTraits, Dict, Instance, List, Str, Tuple
+from traits.api import HasStrictTraits, Dict, Instance, List, Str, Tuple
 
 from .piecewise import PiecewiseFunction
 from .utils import load_ctf, save_ctf
@@ -11,51 +10,15 @@ from .utils import load_ctf, save_ctf
 CTF_EXTENSION = '.ctf'
 
 
-class ICtfManager(ABCHasTraits):
-    """ Interface for managing a collection of CTFs by name.
-    """
-
-    # The available CTFs.
-    names = List(Str)
-
-    @abstractmethod
-    def get(self, name):
-        """ Return transfer functions for the given name.
-
-        Parameters
-        ----------
-        name : str
-            The name of the transfer function.
-
-        Returns
-        -------
-        color_func : PiecewiseFunction
-            The color transfer function.
-        alpha_func : PiecewiseFunction
-            The opacity transfer function.
-        """
-
-    @abstractmethod
-    def add(self, name, color_func, alpha_func):
-        """ Add a transfer function with the given name.
-
-        Parameters
-        ----------
-        name : str
-            The name of the transfer function.
-        color_func : PiecewiseFunction
-            The color component of the transfer function.
-        alpha_func : PiecewiseFunction
-            The opacity component of the transfer function.
-        """
-
-
-class CtfManager(ICtfManager):
+class CtfManager(HasStrictTraits):
     """ Simple manager for loading and saving CTF files to a directory.
     """
 
     # The root directory with the files.
     root_dir = Str('.')
+
+    # The available CTFs.
+    names = List(Str)
 
     # The transfer functions by name.
     functions = Dict(
@@ -71,13 +34,38 @@ class CtfManager(ICtfManager):
         manager._read_from_dir()
         return manager
 
-    def add(self, name, ctf, otf):
+    def add(self, name, color_func, alpha_func):
+        """ Add a transfer function with the given name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the transfer function.
+        color_func : PiecewiseFunction
+            The color component of the transfer function.
+        alpha_func : PiecewiseFunction
+            The opacity component of the transfer function.
+        """
         fn = os.path.join(self.root_dir, name + CTF_EXTENSION)
-        save_ctf(ctf, otf, fn)
-        self.functions[name] = (ctf.copy(), otf.copy())
+        save_ctf(color_func, alpha_func, fn)
+        self.functions[name] = (color_func.copy(), alpha_func.copy())
         self._update_names()
 
     def get(self, name):
+        """ Return transfer functions for the given name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the transfer function.
+
+        Returns
+        -------
+        color_func : PiecewiseFunction
+            The color transfer function.
+        alpha_func : PiecewiseFunction
+            The opacity transfer function.
+        """
         return self.functions.get(name)
 
     def _read_from_dir(self):
