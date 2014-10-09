@@ -1,3 +1,4 @@
+from base64 import urlsafe_b64encode,urlsafe_b64decode
 import glob
 import os
 
@@ -8,6 +9,14 @@ from .utils import load_ctf, save_ctf
 
 
 CTF_EXTENSION = '.ctf'
+
+
+def _name_encode(name):
+    return urlsafe_b64encode(name.encode('utf-8'))
+
+
+def _name_decode(name):
+    return urlsafe_b64decode(name).decode('utf-8')
 
 
 class CtfManager(HasStrictTraits):
@@ -46,7 +55,8 @@ class CtfManager(HasStrictTraits):
         alpha_func : PiecewiseFunction
             The opacity component of the transfer function.
         """
-        fn = os.path.join(self.root_dir, name + CTF_EXTENSION)
+        encoded_name = _name_encode(name)
+        fn = os.path.join(self.root_dir, encoded_name + CTF_EXTENSION)
         if not os.path.isdir(self.root_dir):
             os.makedirs(self.root_dir)
 
@@ -76,7 +86,8 @@ class CtfManager(HasStrictTraits):
         funcs = {}
         for fn in ctfs:
             name = os.path.splitext(os.path.basename(fn))[0]
-            funcs[name] = load_ctf(fn)
+            decoded_name = _name_decode(name)
+            funcs[decoded_name] = load_ctf(fn)
         self.functions = funcs
         self._update_names()
 
