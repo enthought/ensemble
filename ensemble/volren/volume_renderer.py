@@ -65,7 +65,7 @@ class VolumeRenderer(HasStrictTraits):
     clip_bounds = List(CInt)
 
     # Render quality setting
-    render_quality = Enum('performance', QUALITY_SETTINGS.keys())
+    render_quality = Enum('default', QUALITY_SETTINGS.keys())
 
     # -------------------------------------------------------------------------
     # Public interface
