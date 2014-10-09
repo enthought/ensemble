@@ -2,7 +2,7 @@ from ensemble.ctf.piecewise import PiecewiseFunction, verify_values
 
 
 def test_piecewise_insert():
-    pf = PiecewiseFunction(key=lambda x: x[0])
+    pf = PiecewiseFunction()
 
     values = [(0.0, 0.0), (0.5, 0.5), (1.0, 1.0)]
     for val in values:
@@ -14,7 +14,7 @@ def test_piecewise_insert():
 
 
 def test_piecewise_neighbors():
-    pf = PiecewiseFunction(key=lambda x: x[0])
+    pf = PiecewiseFunction()
 
     values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
     for val in values:
@@ -25,7 +25,7 @@ def test_piecewise_neighbors():
 
 
 def test_piecewise_remove():
-    pf = PiecewiseFunction(key=lambda x: x[0])
+    pf = PiecewiseFunction()
 
     values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
     for val in values:
@@ -36,7 +36,7 @@ def test_piecewise_remove():
 
 
 def test_piecewise_update():
-    pf = PiecewiseFunction(key=lambda x: x[0])
+    pf = PiecewiseFunction()
 
     values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
     for val in values:

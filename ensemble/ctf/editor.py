@@ -14,7 +14,7 @@ COLOR_DEFAULT = ((0.0, 0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0))
 
 
 def create_function(values):
-    fn = PiecewiseFunction(key=lambda x: x[0])
+    fn = PiecewiseFunction()
     for v in values:
         fn.insert(v)
     return fn
@@ -28,11 +28,6 @@ class CtfEditor(Component):
     colors = Instance(PiecewiseFunction)
 
     function_updated = Event
-
-    # A callable which prompts the user for a filename.
-    # A single keyword argument 'action' will be passed to the callable and
-    # its value will be 'open' or 'save'. A filename should be returned.
-    prompt_file_selection = Callable
 
     # A callable which prompts the user for a color
     # A single keyword argument 'starting_color' will be passed to the callable

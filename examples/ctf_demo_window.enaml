@@ -1,19 +1,48 @@
-from enaml.layout.api import vbox
-from enaml.widgets.api import Container, Window
+from uuid import uuid4
+
+from enaml.layout.api import hbox, vbox, spacer
+from enaml.widgets.api import ComboBox, Container, PushButton, Window
 from traits_enaml.widgets.enable_canvas import EnableCanvas
 
 
+def save_transfer_function(ctf_editor, ctf_manager):
+    name = 'function_{0}'.format(uuid4().hex[:6])
+    ctf_manager.add(name, ctf_editor.colors, ctf_editor.opacities)
+    return name
+
+
+def select_transfer_function(ctf_editor, ctf_manager, name):
+    color_func, alpha_func = ctf_manager.get(name)
+    ctf_editor.colors.update_from_function(color_func)
+    ctf_editor.opacities.update_from_function(alpha_func)
+    ctf_editor.update_function()
+
+
 enamldef CtfDemoWindow(Window): pd_view:
-    attr ctf
+    attr ctf_editor
+    attr ctf_manager
 
     title = "Color Transfer Function Editor"
     initial_size = (450, 150)
 
     Container:
         constraints = [
-            vbox(ctf_editor),
-            ctf_editor.height == 125
+            hbox(ctf_canvas, vbox(name_combo, save_button, spacer)),
+            ctf_canvas.height == 125
         ]
 
-        EnableCanvas: ctf_editor:
-            component << ctf
+        EnableCanvas: ctf_canvas:
+            component << ctf_editor
+
+        ComboBox: name_combo:
+            items << ctf_manager.names
+            index = 0
+            selected_item ::
+                name = self.selected_item
+                select_transfer_function(ctf_editor, ctf_manager, name)
+
+        PushButton: save_button:
+            text = 'Save'
+            clicked ::
+                name = save_transfer_function(ctf_editor, ctf_manager)
+                name_combo.index = ctf_manager.names.index(name)

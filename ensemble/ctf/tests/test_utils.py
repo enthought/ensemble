@@ -6,7 +6,7 @@ from ensemble.ctf.utils import AlphaFunctionUIAdapter, ColorFunctionUIAdapter
 
 
 def build_piecewise_func(data):
-    pf = PiecewiseFunction(key=lambda x: x[0])
+    pf = PiecewiseFunction()
 
     for value in data:
         pf.insert(value)

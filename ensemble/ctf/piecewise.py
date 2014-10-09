@@ -1,4 +1,5 @@
 from bisect import bisect
+from operator import itemgetter
 from types import FloatType
 
 
@@ -6,12 +7,18 @@ class PiecewiseFunction(object):
     """ A piecewise linear function.
     """
     def __init__(self, key=None):
-        self.keyfunc = key or (lambda x: id(x))
+        self.keyfunc = key or itemgetter(0)
         self.clear()
 
     def clear(self):
         self._keys = []
         self._values = []
+
+    def copy(self):
+        cls = type(self)
+        other = cls(key=self.keyfunc)
+        other.update_from_function(self)
+        return other
 
     def insert(self, value):
         key = self.keyfunc(value)
@@ -43,6 +50,11 @@ class PiecewiseFunction(object):
         key = self.keyfunc(value)
         self._keys[index] = key
         self._values[index] = value
+
+    def update_from_function(self, other):
+        self.clear()
+        self._keys = other._keys[:]
+        self._values = other._values[:]
 
     def value_at(self, index):
         return self._values[index]

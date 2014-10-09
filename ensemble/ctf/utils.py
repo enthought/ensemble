@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import json
 from math import sqrt
 
 import numpy as np
@@ -6,7 +7,7 @@ import numpy as np
 from enable.component import Component
 from traits.api import ABCHasTraits, Callable, Float, Instance
 
-from ensemble.ctf.piecewise import PiecewiseFunction
+from ensemble.ctf.piecewise import PiecewiseFunction, verify_values
 
 
 def build_function_to_screen(component):
@@ -40,9 +41,40 @@ def clip(value, limits):
     return min(max(value, v_min), v_max)
 
 
-def point_dist(pos0, pos1):
+def dist2d(pos0, pos1):
     diff = np.subtract(pos0, pos1)
     return sqrt(diff[0]**2 + diff[1]**2)
+
+
+def load_ctf(filename):
+    """ Load transfer functions from a file.
+    """
+    with open(filename, 'rb') as fp:
+        loaded_data = json.load(fp)
+
+    keys = ('alpha', 'color')
+    has_values = all(k in loaded_data for k in keys)
+    verified_values = all(verify_values(loaded_data[k]) for k in keys)
+    if not (has_values and verified_values):
+        msg = "{0} does not have valid transfer function data."
+        raise IOError(msg.format(filename))
+
+    alpha_func = PiecewiseFunction()
+    color_func = PiecewiseFunction()
+    parts = (('alpha', alpha_func), ('color', color_func))
+    for name, func in parts:
+        for value in loaded_data[name]:
+            func.insert(tuple(value))
+
+    return (color_func, alpha_func)
+
+
+def save_ctf(color_func, alpha_func, filename):
+    """ Save transfer functions to a file.
+    """
+    function = {'alpha': alpha_func.values(), 'color': color_func.values()}
+    with open(filename, 'wb') as fp:
+        json.dump(function, fp, indent=1)
 
 
 class FunctionUIAdapter(ABCHasTraits):
@@ -86,7 +118,7 @@ class AlphaFunctionUIAdapter(FunctionUIAdapter):
         values = [self.function.value_at(i) for i in indices]
         for index, val in zip(indices, values):
             val_screen = self.function_to_screen(val)
-            if point_dist(val_screen, mouse_pos) < self.valid_distance:
+            if dist2d(val_screen, mouse_pos) < self.valid_distance:
                 return index
         return None
 
