@@ -2,7 +2,6 @@
 
 from contextlib import contextmanager
 from os import listdir
-from os.path import isfile, join
 import shutil
 import tempfile
 
@@ -23,13 +22,6 @@ def temp_directory():
 
 def sample_function_parts():
     return create_function(COLOR_DEFAULT), create_function(ALPHA_DEFAULT)
-
-
-def test_ctf_manager_crazy_names():
-    color_func, alpha_func = sample_function_parts()
-
-    with temp_directory() as root_dir:
-        manager = CtfManager.from_directory(root_dir)
 
 
 def test_ctf_manager_add():

@@ -1,4 +1,4 @@
-from base64 import urlsafe_b64encode,urlsafe_b64decode
+from base64 import urlsafe_b64encode, urlsafe_b64decode
 import glob
 import os
 
