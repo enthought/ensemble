@@ -26,9 +26,10 @@ class Volume3D(Volume):
         input = self.module_manager.source.outputs[0]
         data_types = (vtkConstants.VTK_UNSIGNED_CHAR,
                       vtkConstants.VTK_UNSIGNED_SHORT)
+        mapper_types = []
         if input.point_data.scalars.data_type not in data_types:
             if 'FixedPointVolumeRayCastMapper' in self._available_mapper_types:
-                self._mapper_types = ['FixedPointVolumeRayCastMapper']
+                mapper_types = ['FixedPointVolumeRayCastMapper']
             else:
                 error('Available volume mappers only work with \
                       unsigned_char or unsigned_short datatypes')
@@ -38,8 +39,8 @@ class Volume3D(Volume):
             for mapper in check:
                 if mapper in self._available_mapper_types:
                     mapper_types.append(mapper)
-            self._mapper_types = mapper_types
-        self._mapper_types.append('VolumeTextureMapper3D')
+        mapper_types.append('VolumeTextureMapper3D')
+        self._mapper_types = mapper_types
 
     def _volume_mapper_type_changed(self, value):
         if self.module_manager is None:

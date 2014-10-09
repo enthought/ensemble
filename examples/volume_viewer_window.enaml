@@ -1,9 +1,12 @@
 from enaml.application import schedule
 from enaml.layout.api import vbox
-from enaml.widgets.api import Container, MainWindow
+from enaml.stdlib.slider_transform import FloatTransform
+from enaml.widgets.api import (ComboBox, Container, Form, Label, MainWindow,
+                               Notebook, Page, Slider)
+from traits_enaml.widgets.enable_canvas import EnableCanvas
 
 from ensemble.volren.volume_viewer_ui import (
-    VolumeViewerClip, VolumeViewerContainer
+    VolumeViewerClip, VolumeViewerCanvas
 )
 
 
@@ -11,18 +14,53 @@ enamldef VolumeViewerWindow(MainWindow): vr_win:
     attr viewer
 
     title = 'Volume Viewer'
-    initial_size=(800, 900)
+    initial_size=(800, 800)
 
     activated ::
         schedule(self.send_to_front)
 
     Container:
         constraints = [
-            vbox(vv_view, vv_clip),
+            vbox(vv_view, config_ui),
         ]
 
-        VolumeViewerContainer: vv_view:
+        VolumeViewerCanvas: vv_view:
             viewer << vr_win.viewer
 
-        VolumeViewerClip: vv_clip:
-            viewer << vr_win.viewer
+        Notebook: config_ui:
+            tab_style = 'preferences'
+
+            Page:
+                title = 'Transfer function'
+                closable = False
+                Container:
+                    EnableCanvas:
+                        component << viewer.ctf_editor
+
+            Page:
+                title = 'Clipping'
+                closable = False
+                VolumeViewerClip:
+                    viewer << vr_win.viewer
+
+            Page:
+                title = 'Misc'
+                closable = False
+                Form:
+                    Label:
+                        text = 'Render Quality:'
+                    ComboBox:
+                        items = ['Default', 'Best', 'Performance']
+                        index = 0
+                        selected_item ::
+                            renderer = vr_win.viewer.volume_renderer
+                            renderer.render_quality = self.selected_item.lower()
+
+                    Label:
+                        text = 'Volume Alpha:'
+                    Slider:
+                        FloatTransform:
+                            value := viewer.volume_renderer.global_alpha
+                            minimum = 0.0
+                            maximum = 1.0
+                            precision = 100

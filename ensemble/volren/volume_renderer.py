@@ -1,6 +1,7 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import HasStrictTraits, CInt, Instance, List, Property
+from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,
+                        Range)
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
@@ -8,6 +9,36 @@ from .volume_3d import Volume3D, volume3d
 from .volume_data import VolumeData
 
 CLIP_MAX = 512
+QUALITY_SETTINGS = {
+    'best': {
+        'mapper': {
+            'sample_distance': 0.05,
+        },
+        'property': {
+            'shade': False,
+            'ambient': 0.5,
+            'diffuse': 0.4,
+            'specular': 0.1,
+            'specular_power': 100,
+        }
+    },
+    'default': {
+        'mapper': {
+            'sample_distance': 0.2,
+        },
+        'property': {
+            'shade': False
+        }
+    },
+    'performance': {
+        'mapper': {
+            'sample_distance': 1.0,
+        },
+        'property': {
+            'shade': False
+        }
+    },
+}
 
 
 class VolumeRenderer(HasStrictTraits):
@@ -30,9 +61,13 @@ class VolumeRenderer(HasStrictTraits):
     # The transfer function components
     opacities = Instance(PiecewiseFunction)
     colors = Instance(PiecewiseFunction)
+    global_alpha = Range(0.0, 1.0, value=1.0)
 
     # Clip plane positions
     clip_bounds = List(CInt)
+
+    # Render quality setting
+    render_quality = Enum('default', QUALITY_SETTINGS.keys())
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -68,7 +103,7 @@ class VolumeRenderer(HasStrictTraits):
                 # we need to jog a value that is exactly equal by a little bit.
                 if alphas[i-1][0] == alpha[0]:
                     x += 1e-8
-            opacity_tf.add_point(lerp(x), alpha[1])
+            opacity_tf.add_point(lerp(x), alpha[1] * self.global_alpha)
 
         self._set_volume_ctf(color_tf, opacity_tf)
 
@@ -92,6 +127,12 @@ class VolumeRenderer(HasStrictTraits):
     def _clip_bounds_changed(self):
         self._set_volume_clip_planes()
 
+    def _global_alpha_changed(self):
+        self.set_transfer_function()
+
+    def _render_quality_changed(self):
+        self._setup_volume()
+
     def _get_actor(self):
         return self.volume.actors[0]
 
@@ -100,8 +141,9 @@ class VolumeRenderer(HasStrictTraits):
     # -------------------------------------------------------------------------
 
     def _setup_volume(self):
-        self.volume.volume_mapper.trait_set(sample_distance=0.2)
-        self.volume.volume_property.trait_set(shade=False)
+        render_settings = QUALITY_SETTINGS[self.render_quality]
+        self.volume.volume_mapper.trait_set(**render_settings['mapper'])
+        self.volume.volume_property.trait_set(**render_settings['property'])
         self._set_volume_clip_planes()
         self.set_transfer_function()
 
