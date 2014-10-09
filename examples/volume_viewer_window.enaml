@@ -1,7 +1,8 @@
 from enaml.application import schedule
 from enaml.layout.api import vbox
+from enaml.stdlib.slider_transform import FloatTransform
 from enaml.widgets.api import (ComboBox, Container, Form, Label, MainWindow,
-                               Notebook, Page)
+                               Notebook, Page, Slider)
 from traits_enaml.widgets.enable_canvas import EnableCanvas
 
 from ensemble.volren.volume_viewer_ui import (
@@ -54,3 +55,12 @@ enamldef VolumeViewerWindow(MainWindow): vr_win:
                         selected_item ::
                             renderer = vr_win.viewer.volume_renderer
                             renderer.render_quality = self.selected_item.lower()
+
+                    Label:
+                        text = 'Volume Alpha:'
+                    Slider:
+                        FloatTransform:
+                            value := viewer.volume_renderer.global_alpha
+                            minimum = 0.0
+                            maximum = 1.0
+                            precision = 100

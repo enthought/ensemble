@@ -1,6 +1,7 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
-from traits.api import HasStrictTraits, CInt, Enum, Instance, List, Property
+from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,
+                        Range)
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
@@ -60,6 +61,7 @@ class VolumeRenderer(HasStrictTraits):
     # The transfer function components
     opacities = Instance(PiecewiseFunction)
     colors = Instance(PiecewiseFunction)
+    global_alpha = Range(0.0, 1.0, value=1.0)
 
     # Clip plane positions
     clip_bounds = List(CInt)
@@ -101,7 +103,7 @@ class VolumeRenderer(HasStrictTraits):
                 # we need to jog a value that is exactly equal by a little bit.
                 if alphas[i-1][0] == alpha[0]:
                     x += 1e-8
-            opacity_tf.add_point(lerp(x), alpha[1])
+            opacity_tf.add_point(lerp(x), alpha[1] * self.global_alpha)
 
         self._set_volume_ctf(color_tf, opacity_tf)
 
@@ -124,6 +126,9 @@ class VolumeRenderer(HasStrictTraits):
 
     def _clip_bounds_changed(self):
         self._set_volume_clip_planes()
+
+    def _global_alpha_changed(self):
+        self.set_transfer_function()
 
     def _render_quality_changed(self):
         self._setup_volume()
