@@ -1,4 +1,5 @@
 from bisect import bisect
+from operator import itemgetter
 from types import FloatType
 
 
@@ -6,7 +7,7 @@ class PiecewiseFunction(object):
     """ A piecewise linear function.
     """
     def __init__(self, key=None):
-        self.keyfunc = key or (lambda x: id(x))
+        self.keyfunc = key or itemgetter(0)
         self.clear()
 
     def clear(self):

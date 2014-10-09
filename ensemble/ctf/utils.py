@@ -1,8 +1,6 @@
 from abc import abstractmethod
 import json
 from math import sqrt
-from operator import itemgetter
-
 
 import numpy as np
 
@@ -61,8 +59,8 @@ def load_ctf(filename):
         msg = "{0} does not have valid transfer function data."
         raise IOError(msg.format(filename))
 
-    alpha_func = PiecewiseFunction(key=itemgetter(0))
-    color_func = PiecewiseFunction(key=itemgetter(0))
+    alpha_func = PiecewiseFunction()
+    color_func = PiecewiseFunction()
     parts = (('alpha', alpha_func), ('color', color_func))
     for name, func in parts:
         for value in loaded_data[name]:

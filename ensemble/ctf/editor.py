@@ -14,7 +14,7 @@ COLOR_DEFAULT = ((0.0, 0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0))
 
 
 def create_function(values):
-    fn = PiecewiseFunction(key=lambda x: x[0])
+    fn = PiecewiseFunction()
     for v in values:
         fn.insert(v)
     return fn
