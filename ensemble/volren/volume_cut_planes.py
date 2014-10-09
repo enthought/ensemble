@@ -1,8 +1,17 @@
+from collections import OrderedDict
+
 from mayavi import mlab
 from mayavi.core.api import PipelineBase
-from traits.api import Instance, Range, on_trait_change
+from traits.api import Enum, Instance, List, Range, Str, on_trait_change
 
 from .volume_scene_member import ABCVolumeSceneMember
+
+
+CUT_COLORMAPS = OrderedDict([
+    (u'Gray', 'gray'),
+    (u'Bone', 'bone'),
+    (u'RdBu', 'RdBu'),
+])
 
 
 class VolumeCutPlanes(ABCVolumeSceneMember):
@@ -13,6 +22,10 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
     image_plane_widget_x = Instance(PipelineBase)
     image_plane_widget_y = Instance(PipelineBase)
     image_plane_widget_z = Instance(PipelineBase)
+
+    # Colormap selection
+    available_cut_colormaps = List(Str, CUT_COLORMAPS.keys())
+    selected_cut_color_map = Enum(values='available_cut_colormaps')
 
     # A global multiplier to the opacity transfer function.
     slicer_alpha = Range(0.0, 1.0, value=1.0)
@@ -51,6 +64,17 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
         for ipw in image_plane_widgets:
             if ipw is not None:
                 ipw.ipw.texture_plane_property.opacity = alpha
+                ipw.render()
+
+    def _selected_cut_color_map_changed(self, new):
+        image_plane_widgets = (
+            self.image_plane_widget_x, self.image_plane_widget_y,
+            self.image_plane_widget_z
+        )
+        for ipw in image_plane_widgets:
+            if ipw is not None:
+                lut_manager = ipw.module_manager.scalar_lut_manager
+                lut_manager.lut_mode = CUT_COLORMAPS[new]
                 ipw.render()
 
     @on_trait_change('cut_brightness,cut_contrast,image_plane_widget_z')
