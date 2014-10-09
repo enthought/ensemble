@@ -11,6 +11,9 @@ alter the viewer's transfer function:
       transfer function, which controls the opacity of intensity values.
 
 """
+import argparse
+from contextlib import closing
+
 import numpy as np
 
 from enaml.qt.qt_application import QtApplication
@@ -22,11 +25,6 @@ from ensemble.volren.volume_viewer import VolumeViewer
 
 with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
-
-
-def main():
-    volume = example_volume()
-    show_volume(volume)
 
 
 def example_volume(size=61, height=80):
@@ -64,6 +62,29 @@ def show_volume(volume):
     win = VolumeViewerWindow(viewer=viewer)
     win.show()
     app.start()
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-n', '--node', default='/ct',
+                        help='The path to the node in the HDF5 file '
+                             'containing the volume data.')
+    parser.add_argument('volume_file', nargs='?',
+                        help='The HDF5 file containing the volume data. '
+                             'If omitted, an example volume will be '
+                             'generated.')
+
+    args = parser.parse_args()
+    if args.volume_file is None:
+        volume = example_volume()
+    else:
+        import tables
+
+        with closing(tables.openFile(args.volume_file)) as h5:
+            volume = h5.getNode(args.node)[:].T
+
+    show_volume(volume)
 
 
 if __name__ == '__main__':
