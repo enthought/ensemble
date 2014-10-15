@@ -27,6 +27,33 @@ with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
 
 
+def build_volume_data(cmdline_args):
+    if cmdline_args.volume_file is None:
+        volume = example_volume()
+    else:
+        import tables
+
+        with closing(tables.openFile(cmdline_args.volume_file)) as h5:
+            volume = h5.getNode(cmdline_args.node)[:].T
+
+    volume_data_kwargs = {'raw_data': volume}
+    if cmdline_args.mask:
+        volume_data_kwargs['mask_data'] = example_volume_mask(volume)
+
+    return VolumeData(**volume_data_kwargs)
+
+
+def example_volume_mask(volume_array):
+    mask = np.zeros_like(volume_array)
+    depth, height, width = mask.shape
+    half = (depth/2, height/2, width/2)
+    quarter = (depth/3, height/3, width/3)
+    axis_slices = [slice(half[i]-quarter[i], half[i]+quarter[i])
+                   for i in range(3)]
+    mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
+    return mask
+
+
 def example_volume(size=61, height=80):
     cross_section = example_cross_section(size)
     volume = np.tile(cross_section, (height, 1, 1))
@@ -53,9 +80,8 @@ def rescale_uint8(array):
     return array.astype(np.uint8)
 
 
-def show_volume(volume):
+def show_volume(volume_data):
     app = QtApplication()
-    volume_data = VolumeData(raw_data=volume)
     scene_members = [VolumeBoundingBox()]
     viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256,
                           scene_members=scene_members)
@@ -67,6 +93,8 @@ def show_volume(volume):
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-m', '--mask', action='store_true',
+                        help='Whether or not the data should be masked.')
     parser.add_argument('-n', '--node', default='/ct',
                         help='The path to the node in the HDF5 file '
                              'containing the volume data.')
@@ -76,15 +104,8 @@ def main():
                              'generated.')
 
     args = parser.parse_args()
-    if args.volume_file is None:
-        volume = example_volume()
-    else:
-        import tables
-
-        with closing(tables.openFile(args.volume_file)) as h5:
-            volume = h5.getNode(args.node)[:].T
-
-    show_volume(volume)
+    volume_data = build_volume_data(args)
+    show_volume(volume_data)
 
 
 if __name__ == '__main__':
