@@ -94,15 +94,15 @@ class VolumeData(HasTraits):
         return self._mask_data
 
     def _set_mask_data(self, value):
-        self._mask_data = np.asfortranarray(value)
         self._render_data = None
+        self._mask_data = np.asfortranarray(value)
 
     def _get_raw_data(self):
         return self._raw_data
 
     def _set_raw_data(self, value):
-        self._raw_data = np.asfortranarray(value)
         self._render_data = None
+        self._raw_data = np.asfortranarray(value)
 
     def _prepare_data(self):
         image_data = _image_data_from_array(self.raw_data, self.spacing)
