@@ -47,7 +47,7 @@ def example_volume_mask(volume_array):
     mask = np.zeros_like(volume_array)
     depth, height, width = mask.shape
     half = (depth/2, height/2, width/2)
-    quarter = (depth/3, height/3, width/3)
+    quarter = (depth/4, height/4, width/4)
     axis_slices = [slice(half[i]-quarter[i], half[i]+quarter[i])
                    for i in range(3)]
     mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
