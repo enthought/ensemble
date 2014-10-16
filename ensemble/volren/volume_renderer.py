@@ -1,7 +1,7 @@
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,
-                        Range)
+                        Range, on_trait_change)
 from tvtk.api import tvtk
 
 from ensemble.ctf.piecewise import PiecewiseFunction
@@ -74,7 +74,7 @@ class VolumeRenderer(HasStrictTraits):
     # -------------------------------------------------------------------------
 
     def add_volume_to_scene(self, scene_model):
-        source = add_dataset(self.data.resampled_image_data,
+        source = add_dataset(self.data.render_data,
                              figure=scene_model.mayavi_scene)
         self.data_source = source
         self.volume = volume3d(source, figure=scene_model.mayavi_scene)
@@ -117,9 +117,12 @@ class VolumeRenderer(HasStrictTraits):
     def _data_changed(self):
         self.vmin = self.data.raw_data.min()
         self.vmax = self.data.raw_data.max()
+        self._render_data_changed()
 
+    @on_trait_change('data:_raw_data,data:_mask_data')
+    def _render_data_changed(self):
         if self.data_source is not None:
-            image_data = self.data.resampled_image_data
+            image_data = self.data.render_data
             self.data_source.data = image_data
             self.data_source.update()
             self._setup_volume()
