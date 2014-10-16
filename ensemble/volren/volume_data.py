@@ -1,6 +1,6 @@
 import numpy as np
 
-from traits.api import HasTraits, Array, Float, Instance, Property, Tuple
+from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
 
 
@@ -53,18 +53,19 @@ def _resample_data(image_data):
     return reslicer.output
 
 
-class VolumeData(HasTraits):
-    """ The volume image data.
+class VolumeData(HasStrictTraits):
+    """ A high level interface to uniform rectilinear volume data which
+    provides masking and resampling.
     """
 
     # A mask to apply to the data
-    mask_data = Property(VolumeArray)
+    mask_data = Property(VolumeArray, depends_on='_mask_data')
 
     # The mask data as a fortran array
     _mask_data = VolumeArray
 
     # The data itself.
-    raw_data = Property(VolumeArray)
+    raw_data = Property(VolumeArray, depends_on='_raw_data')
 
     # The data as a fortran array
     _raw_data = VolumeArray
@@ -78,6 +79,20 @@ class VolumeData(HasTraits):
     # A resampled/masked version of the data, suitable for rendering
     render_data = Property(Instance(tvtk.ImageData))
     _render_data = Instance(tvtk.ImageData)
+
+    # -------------------------------------------------------------------------
+    # Public interface
+    # -------------------------------------------------------------------------
+
+    def clear_mask(self):
+        """ Remove any mask which is currently set.
+        """
+        # This is the most minimal array that can be assigned to a VolumeArray
+        self.mask_data = np.zeros((1, 1, 1), dtype='uint8')
+
+    # -------------------------------------------------------------------------
+    # Traits handlers
+    # -------------------------------------------------------------------------
 
     def _bounds_default(self):
         return tuple(np.array(self.spacing) * np.array(self.raw_data.shape))
@@ -103,6 +118,10 @@ class VolumeData(HasTraits):
     def _set_raw_data(self, value):
         self._render_data = None
         self._raw_data = np.asfortranarray(value)
+
+    # -------------------------------------------------------------------------
+    # Private methods
+    # -------------------------------------------------------------------------
 
     def _prepare_data(self):
         image_data = _image_data_from_array(self.raw_data, self.spacing)

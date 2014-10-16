@@ -119,7 +119,7 @@ class VolumeRenderer(HasStrictTraits):
         self.vmax = self.data.raw_data.max()
         self._render_data_changed()
 
-    @on_trait_change('data:_raw_data,data:_mask_data')
+    @on_trait_change('data:raw_data,data:mask_data')
     def _render_data_changed(self):
         if self.data_source is not None:
             image_data = self.data.render_data
