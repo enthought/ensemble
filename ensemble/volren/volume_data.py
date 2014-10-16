@@ -4,7 +4,7 @@ from traits.api import HasTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
 
 
-ThreeDeeArray = Array(shape=(None, None, None))
+VolumeArray = Array(shape=(None, None, None))
 
 # The point data scalars need a name for some Mayavi operations.
 POINT_DATA_SCALARS_NAME = 'VolumeData'
@@ -58,16 +58,16 @@ class VolumeData(HasTraits):
     """
 
     # A mask to apply to the data
-    mask_data = Property(ThreeDeeArray)
+    mask_data = Property(VolumeArray)
 
     # The mask data as a fortran array
-    _mask_data = ThreeDeeArray
+    _mask_data = VolumeArray
 
     # The data itself.
-    raw_data = Property(ThreeDeeArray)
+    raw_data = Property(VolumeArray)
 
     # The data as a fortran array
-    _raw_data = ThreeDeeArray
+    _raw_data = VolumeArray
 
     # The bounds of the volume
     bounds = Tuple(Float, Float, Float)
