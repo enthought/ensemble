@@ -122,7 +122,7 @@ class VolumeViewer(HasTraits):
         self.model.mlab.view(40, elevation)
         self.model.camera.view_up = view_up
 
-    @on_trait_change('histogram_bins,volume_data')
+    @on_trait_change('histogram_bins,volume_data.raw_data')
     def _new_histogram(self):
         if (self.histogram_bins > 0 and
                 self.volume_data is not None and
