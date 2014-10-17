@@ -87,8 +87,7 @@ class VolumeData(HasStrictTraits):
     def clear_mask(self):
         """ Remove any mask which is currently set.
         """
-        # This is the most minimal array that can be assigned to a VolumeArray
-        self.mask_data = np.zeros((1, 1, 1), dtype='uint8')
+        self.mask_data = np.empty((0, 0, 0), dtype='uint8')
 
     # -------------------------------------------------------------------------
     # Traits handlers
