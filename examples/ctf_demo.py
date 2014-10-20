@@ -13,9 +13,7 @@ from traits.etsconfig.api import ETSConfig
 ETSConfig.toolkit = 'qt4'
 
 from enaml.qt.qt_application import QtApplication
-from ensemble.ctf.editor import CtfEditor
-from ensemble.ctf.manager import CtfManager
-from ensemble.ctf.gui_utils import get_color
+from ensemble.ctf.api import CtfEditor, CtfManager, get_color
 import traits_enaml
 
 
