@@ -19,9 +19,7 @@ import numpy as np
 from enaml.qt.qt_application import QtApplication
 import traits_enaml
 
-from ensemble.volren.volume_bounding_box import VolumeBoundingBox
-from ensemble.volren.volume_data import VolumeData
-from ensemble.volren.volume_viewer import VolumeViewer
+from ensemble.volren.api import VolumeBoundingBox, VolumeData, VolumeViewer
 
 with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
