@@ -2,9 +2,9 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 import glob
 import os
 
-from traits.api import HasStrictTraits, Dict, Instance, List, Str, Tuple
+from traits.api import HasStrictTraits, Dict, Instance, List, Str
 
-from .piecewise import PiecewiseFunction
+from .linked import LinkedFunction
 from .utils import load_ctf, save_ctf
 
 
@@ -30,10 +30,7 @@ class CtfManager(HasStrictTraits):
     names = List(Str)
 
     # The transfer functions by name.
-    functions = Dict(
-        Str,
-        Tuple(Instance(PiecewiseFunction), Instance(PiecewiseFunction)),
-    )
+    functions = Dict(Str, Instance(LinkedFunction))
 
     @classmethod
     def from_directory(cls, root_dir, **traits):
@@ -43,43 +40,39 @@ class CtfManager(HasStrictTraits):
         manager._read_from_dir()
         return manager
 
-    def add(self, name, color_func, alpha_func):
+    def add(self, name, linked_func):
         """ Add a transfer function with the given name.
 
         Parameters
         ----------
         name : str
             The name of the transfer function.
-        color_func : PiecewiseFunction
-            The color component of the transfer function.
-        alpha_func : PiecewiseFunction
-            The opacity component of the transfer function.
+        linked_func : LinkedFunction
+            A linked function instance
         """
         encoded_name = _name_encode(name)
         fn = os.path.join(self.root_dir, encoded_name + CTF_EXTENSION)
         if not os.path.isdir(self.root_dir):
             os.makedirs(self.root_dir)
 
-        save_ctf(color_func, alpha_func, fn)
-        self.functions[name] = (color_func.copy(), alpha_func.copy())
+        save_ctf(linked_func, fn)
+        self.functions[name] = linked_func
         self._update_names()
 
     def get(self, name):
-        """ Return transfer functions for the given name.
+        """ Return a function for the given name.
 
         Parameters
         ----------
         name : str
-            The name of the transfer function.
+            The name of the function.
 
         Returns
         -------
-        color_func : PiecewiseFunction
-            The color transfer function.
-        alpha_func : PiecewiseFunction
-            The opacity transfer function.
+        linked_func : LinkedFunction
+            A linked function.
         """
-        return self.functions.get(name)
+        return self.functions.get(name).copy()
 
     def _read_from_dir(self):
         ctfs = glob.glob(os.path.join(self.root_dir, '*' + CTF_EXTENSION))

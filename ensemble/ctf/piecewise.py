@@ -1,91 +1,80 @@
-from bisect import bisect
-from operator import itemgetter
-from types import FloatType
+from operator import add, sub
+
+from traits.api import HasStrictTraits, Instance, List, Property
+
+from .function_node import FunctionNode
 
 
-class PiecewiseFunction(object):
+class PiecewiseFunction(HasStrictTraits):
     """ A piecewise linear function.
     """
-    def __init__(self, key=None):
-        self.keyfunc = key or itemgetter(0)
-        self.clear()
+
+    nodes = Property(List(Instance(FunctionNode)), depends_on='_nodes')
+    _nodes = List(Instance(FunctionNode))
 
     def clear(self):
-        self._keys = []
-        self._values = []
+        self._nodes = []
 
     def copy(self):
         cls = type(self)
-        other = cls(key=self.keyfunc)
-        other.update_from_function(self)
-        return other
+        return cls(_nodes=[n.copy() for n in self._nodes])
 
-    def insert(self, value):
-        key = self.keyfunc(value)
-        index = bisect(self._keys, key)
-        self._keys.insert(index, key)
-        self._values.insert(index, value)
+    @classmethod
+    def from_dict(cls, dictionary):
+        node_dicts = dictionary.get('nodes', [])
+        return cls(_nodes=[FunctionNode.from_dict(nd) for nd in node_dicts])
 
-    def items(self):
-        return self._values
+    def index_of(self, node):
+        return self._nodes.index(node)
 
-    def neighbor_indices(self, key_value):
-        index = bisect(self._keys, key_value)
-        try:
-            value = self._keys[index]
-            if key_value < value:
-                return (max(0, index-1), index)
-        except IndexError:
-            max_index = self.size() - 1
-            return (min(index, max_index), min(index+1, max_index))
+    def insert(self, new_node):
+        index = None
+        for i, node in enumerate(self._nodes):
+            if new_node.center < node.center:
+                index = i
+                break
 
-    def remove(self, index):
-        del self._keys[index]
-        del self._values[index]
+        if index is not None:
+            self._nodes.insert(index, new_node)
+        else:
+            self._nodes.append(new_node)
+
+    def node_at(self, index):
+        return self._nodes[index]
+
+    def node_limits(self, node):
+        if node not in self._nodes:
+            return []
+
+        index = self._nodes.index(node)
+        max_index = self.size() - 1
+
+        if index == 0:
+            # The first item can't move
+            return (0.0, 0.0)
+        elif index == max_index:
+            # Neither can the last item
+            return (1.0, 1.0)
+
+        neighbors = self._nodes[index - 1], self._nodes[index + 1]
+        return tuple([op(n.center, n.radius)
+                      for n, op in zip(neighbors, (add, sub))])
+
+    def remove(self, node):
+        if node not in self._nodes:
+            raise ValueError("Node not in piecewise function.")
+
+        index = self._nodes.index(node)
+        del self._nodes[index]
 
     def size(self):
-        return len(self._values)
+        return len(self._nodes)
 
-    def update(self, index, value):
-        key = self.keyfunc(value)
-        self._keys[index] = key
-        self._values[index] = value
-
-    def update_from_function(self, other):
-        self.clear()
-        self._keys = other._keys[:]
-        self._values = other._values[:]
-
-    def value_at(self, index):
-        return self._values[index]
+    def to_dict(self):
+        return {'nodes': [node.to_dict() for node in self._nodes]}
 
     def values(self):
-        # Return a copy
-        return self._values[:]
+        return [v for n in self._nodes for v in n.values()]
 
-
-def verify_values(function_values):
-    """Make sure a sequence of values are valid function values.
-        - Function values must be sequences of length 2 or greater
-        - All values in a function must have the same length
-        - All subvalues in a value sequence must be floating point numbers
-        between 0 and 1, inclusive.
-    """
-    sub_size = -1
-    for value in function_values:
-        try:
-            if sub_size < 0:
-                sub_size = len(value)
-                if sub_size < 2:
-                    return False
-            elif len(value) != sub_size:
-                return False
-            for sub_val in value:
-                if not isinstance(sub_val, FloatType):
-                    return False
-                if not (0.0 <= sub_val <= 1.0):
-                    return False
-        except TypeError:
-            return False
-
-    return True
+    def _get_nodes(self):
+        return self._nodes

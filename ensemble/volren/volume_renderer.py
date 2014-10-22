@@ -4,7 +4,7 @@ from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,
                         Range, on_trait_change)
 from tvtk.api import tvtk
 
-from ensemble.ctf.piecewise import PiecewiseFunction
+from ensemble.ctf.api import PiecewiseFunction
 from .volume_3d import Volume3D, volume3d
 from .volume_data import VolumeData
 
@@ -91,11 +91,11 @@ class VolumeRenderer(HasStrictTraits):
             self.opacities = opacities
 
         color_tf = tvtk.ColorTransferFunction()
-        for color in self.colors.items():
+        for color in self.colors.values():
             color_tf.add_rgb_point(lerp(color[0]), *(color[1:]))
 
         opacity_tf = tvtk.PiecewiseFunction()
-        alphas = self.opacities.items()
+        alphas = self.opacities.values()
         for i, alpha in enumerate(alphas):
             x = alpha[0]
             if i > 0:

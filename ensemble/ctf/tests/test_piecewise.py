@@ -1,63 +1,64 @@
-from ensemble.ctf.piecewise import PiecewiseFunction, verify_values
+from ensemble.ctf.api import PiecewiseFunction, OpacityNode
+
+NODES = [OpacityNode(center=0.0, opacity=0.0),
+         OpacityNode(center=0.5, opacity=0.5),
+         OpacityNode(center=0.9, opacity=1.0)]
+
+
+def _basic_piecewise():
+    pf = PiecewiseFunction()
+    for n in NODES:
+        pf.insert(n)
+
+    return pf
+
+
+def _compare_piecewise(func0, func1):
+    assert func0 is not func1
+    assert func0.nodes != func1.nodes
+    assert func0.size() == func1.size()
+    assert all([n0.center == n1.center and n0.opacity == n1.opacity
+                for n0, n1 in zip(func0.nodes, func1.nodes)])
 
 
 def test_piecewise_insert():
-    pf = PiecewiseFunction()
+    pf = _basic_piecewise()
 
-    values = [(0.0, 0.0), (0.5, 0.5), (1.0, 1.0)]
-    for val in values:
-        pf.insert(val)
-
-    assert pf.items() == values
-    assert pf.value_at(1) == values[1]
-    assert pf.items() == pf.values()
-
-
-def test_piecewise_neighbors():
-    pf = PiecewiseFunction()
-
-    values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
-    for val in values:
-        pf.insert(val)
-
-    assert pf.neighbor_indices(0.5) == (1, 2)
-    assert pf.neighbor_indices(1.0) == (2, 2)
+    assert pf.size() == len(NODES)
+    assert pf.nodes == NODES
+    assert pf.node_at(1) == NODES[1]
 
 
 def test_piecewise_remove():
-    pf = PiecewiseFunction()
+    pf = _basic_piecewise()
 
-    values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
-    for val in values:
-        pf.insert(val)
-
-    pf.remove(0)
-    assert pf.items() == values[1:]
+    pf.remove(NODES[0])
+    assert pf.size() == 2
 
 
-def test_piecewise_update():
-    pf = PiecewiseFunction()
-
-    values = [(0.0, 0.0), (0.5, 0.5), (0.9, 1.0)]
-    for val in values:
-        pf.insert(val)
-
-    values[0] = (0.0, 0.5)
-    pf.update(0, values[0])
-    assert pf.items() == values
+def test_piecewise_copy():
+    pf = _basic_piecewise()
+    _compare_piecewise(pf, pf.copy())
 
 
-def test_verify_values():
-    good_values = [(0.0, 0.0), (1.0, 1.0)]
-    short_subvalues = [(0.0,), (1.0,)]
-    non_uniform_subvalues = [(0.0, 1.0), (1.0, 1.0, 1.0)]
-    int_subvalues = [(0, 1), (1, 0)]
-    out_of_range_subvalues = [(0.0, 1.1), (1.0, 2.0)]
-    bad_data = range(10)
+def test_dictionary_roundtrip():
+    pf = _basic_piecewise()
+    d = pf.to_dict()
 
-    assert verify_values(good_values)
-    assert not verify_values(short_subvalues)
-    assert not verify_values(non_uniform_subvalues)
-    assert not verify_values(int_subvalues)
-    assert not verify_values(out_of_range_subvalues)
-    assert not verify_values(bad_data)
+    _compare_piecewise(pf, PiecewiseFunction.from_dict(d))
+
+
+def test_node_limits():
+    pf = _basic_piecewise()
+    limits = pf.node_limits(NODES[1])
+
+    assert limits[0] == NODES[0].center and limits[1] == NODES[-1].center
+
+
+def test_node_ordering():
+    pf = _basic_piecewise()
+    reverse_pf = PiecewiseFunction()
+    for n in reversed(NODES):
+        reverse_pf.insert(n.copy())
+
+    _compare_piecewise(pf, reverse_pf)
