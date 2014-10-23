@@ -4,8 +4,7 @@ from mayavi.core.ui.api import MlabSceneModel
 from traits.api import Bool, CInt, HasTraits, Instance, List, on_trait_change
 from tvtk.api import tvtk
 
-from ensemble.ctf.editor import CtfEditor
-from ensemble.ctf.gui_utils import get_color
+from ensemble.ctf.api import CtfEditor, get_color
 from .volume_data import VolumeData
 from .volume_renderer import VolumeRenderer
 from .volume_scene_member import ABCVolumeSceneMember
@@ -65,9 +64,10 @@ class VolumeViewer(HasTraits):
         return [0, CLIP_MAX, 0, CLIP_MAX, 0, CLIP_MAX]
 
     def _volume_renderer_default(self):
+        function = self.ctf_editor.function
         return VolumeRenderer(data=self.volume_data,
-                              colors=self.ctf_editor.colors,
-                              opacities=self.ctf_editor.opacities)
+                              colors=function.color,
+                              opacities=function.opacity)
 
     def _ctf_editor_default(self):
         return CtfEditor(prompt_color_selection=get_color)
@@ -82,10 +82,11 @@ class VolumeViewer(HasTraits):
     def _clip_bounds_items_changed(self):
         self.volume_renderer.clip_bounds = self.clip_bounds[:]
 
-    @on_trait_change('ctf_editor.function_updated')
+    @on_trait_change('ctf_editor.function.updated')
     def ctf_updated(self):
         set_ctf = self.volume_renderer.set_transfer_function
-        set_ctf(self.ctf_editor.colors, self.ctf_editor.opacities)
+        function = self.ctf_editor.function
+        set_ctf(function.color, function.opacity)
 
     # -------------------------------------------------------------------------
     # Scene activation callbacks

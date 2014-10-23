@@ -7,15 +7,13 @@ from traits_enaml.widgets.enable_canvas import EnableCanvas
 
 def save_transfer_function(ctf_editor, ctf_manager):
     name = 'function_{0}'.format(uuid4().hex[:6])
-    ctf_manager.add(name, ctf_editor.colors, ctf_editor.opacities)
+    ctf_manager.add(name, ctf_editor.function)
     return name
 
 
 def select_transfer_function(ctf_editor, ctf_manager, name):
-    color_func, alpha_func = ctf_manager.get(name)
-    ctf_editor.colors.update_from_function(color_func)
-    ctf_editor.opacities.update_from_function(alpha_func)
-    ctf_editor.update_function()
+    linked_function = ctf_manager.get(name)
+    ctf_editor.function = linked_function
 
 
 enamldef CtfDemoWindow(Window): pd_view:

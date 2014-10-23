@@ -3,7 +3,7 @@ import unittest
 from enable.testing import EnableTestAssistant
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 
-from ensemble.ctf.editor import CtfEditor
+from ensemble.ctf.api import CtfEditor, ColorNode, OpacityNode
 
 
 def get_color(starting_color=None):
@@ -32,8 +32,12 @@ enamldef MainView(MainWindow):
 
         editor = CtfEditor(bounds=(400, 100),
                            prompt_color_selection=get_color)
-        editor.add_function_node(editor.opacities, (0.5, 0.5))
-        editor.add_function_node(editor.colors, (0.25, 1.0, 0.0, 0.0))
+
+        function = editor.function.copy()
+        function.color.insert(ColorNode(center=0.25, color=(1.0, 0.0, 0.0)))
+        function.opacity.insert(OpacityNode(center=0.5, opacity=0.5))
+        editor.function = function
+
         self.editor = editor
         self.view, _ = self.parse_and_create(enaml_source, editor=self.editor)
 
