@@ -82,7 +82,7 @@ class VolumeViewer(HasTraits):
     def _clip_bounds_items_changed(self):
         self.volume_renderer.clip_bounds = self.clip_bounds[:]
 
-    @on_trait_change('ctf_editor:function:updated')
+    @on_trait_change('ctf_editor.function.updated')
     def ctf_updated(self):
         set_ctf = self.volume_renderer.set_transfer_function
         function = self.ctf_editor.function
