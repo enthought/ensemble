@@ -57,7 +57,7 @@ class CtfEditor(Container):
     """ A widget for editing transfer functions.
     """
 
-    # The function
+    # The function which is being edited. Contains color and opacity.
     function = Instance(LinkedFunction)
 
     # A callable which prompts the user for a color

@@ -1,3 +1,4 @@
+from bisect import bisect
 from operator import add, sub
 
 from traits.api import HasStrictTraits, Instance, List, Property
@@ -28,16 +29,9 @@ class PiecewiseFunction(HasStrictTraits):
         return self._nodes.index(node)
 
     def insert(self, new_node):
-        index = None
-        for i, node in enumerate(self._nodes):
-            if new_node.center < node.center:
-                index = i
-                break
-
-        if index is not None:
-            self._nodes.insert(index, new_node)
-        else:
-            self._nodes.append(new_node)
+        centers = [node.center for node in self._nodes]
+        index = bisect(centers, new_node.center)
+        self._nodes.insert(index, new_node)
 
     def node_at(self, index):
         return self._nodes[index]
