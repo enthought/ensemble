@@ -3,8 +3,8 @@ from traits.api import Callable, Float, Instance, Tuple
 
 from .function_component import FunctionComponent
 from .function_node import FunctionNode
-from .linked import LinkedFunction
 from .menu_tool import RemoveComponentAction, menu_tool_with_actions
+from .transfer_function import TransferFunction
 
 
 class EditColorAction(Action):
@@ -14,7 +14,7 @@ class EditColorAction(Action):
     component = Instance(FunctionComponent)
 
     # The function where our node lives
-    function = Instance(LinkedFunction)
+    function = Instance(TransferFunction)
 
     # A callable which prompts the user for a color
     prompt_color = Callable

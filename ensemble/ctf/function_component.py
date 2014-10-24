@@ -1,8 +1,8 @@
 from traits.api import Bool, Float, Instance, Property, Tuple
 
 from .function_node import FunctionNode
-from .linked import LinkedFunction
 from .movable_component import MovableComponent
+from .transfer_function import TransferFunction
 from .utils import clip, clip_to_unit
 
 # A place for FunctionNode subclasses to be registered (for deserialization)
@@ -30,8 +30,8 @@ class FunctionComponent(MovableComponent):
     # What are the screen bounds of the parent component
     parent_bounds = Property
 
-    # The linked function where `self.node` lives
-    _linked_function = Instance(LinkedFunction)
+    # The transfer function where `self.node` lives
+    _transfer_function = Instance(TransferFunction)
 
     # Movement limits for `self.node.center`
     _center_limits = Tuple(Float, Float)
@@ -40,7 +40,7 @@ class FunctionComponent(MovableComponent):
     # FunctionComponent interface
     # -----------------------------------------------------------------------
 
-    def add_function_nodes(self, linked_function):
+    def add_function_nodes(self, transfer_function):
         """ Add the node(s) for this component.
         """
         raise NotImplementedError
@@ -58,12 +58,12 @@ class FunctionComponent(MovableComponent):
         factory = _function_component_class_registry[node.__class__]
         return factory.from_function_nodes(*nodes)
 
-    def node_limits(self, linked_function):
+    def node_limits(self, transfer_function):
         """ Compute the movement bounds of the function node.
         """
         raise NotImplementedError
 
-    def remove_function_nodes(self, linked_function):
+    def remove_function_nodes(self, transfer_function):
         """ Remove the node(s) for this component.
         """
         raise NotImplementedError
@@ -81,10 +81,10 @@ class FunctionComponent(MovableComponent):
         parent_width, parent_height = self.parent_bounds
         return (x / float(parent_width), y / float(parent_height))
 
-    def set_node_center(self, node, rel_x):
-        node.center = clip(rel_x, self._center_limits)
+    def update_node_center(self, node, rel_x):
+        node.center = clip(node.center + rel_x, self._center_limits)
 
-    def set_node_radius(self, node, rel_rad):
+    def update_node_radius(self, node, rel_rad):
         min_center, max_center = self._center_limits
         center = node.center
         radius_limit = min(center - min_center, max_center - center)
@@ -92,8 +92,8 @@ class FunctionComponent(MovableComponent):
 
     def update_function(self):
         # Let the world know that the function has changed.
-        if self._linked_function is not None:
-            self._linked_function.updated = True
+        if self._transfer_function is not None:
+            self._transfer_function.updated = True
 
     # -----------------------------------------------------------------------
     # Traits handlers
@@ -104,7 +104,7 @@ class FunctionComponent(MovableComponent):
 
     def _event_state_changed(self, new):
         if new == 'moving':
-            self._center_limits = self.node_limits(self._linked_function)
+            self._center_limits = self.node_limits(self._transfer_function)
         elif new == 'normal':
             self._center_limits = (0.0, 1.0)
 

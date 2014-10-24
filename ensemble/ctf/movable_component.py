@@ -1,19 +1,23 @@
 from enable.api import Container
+from enable.toolkit_constants import pointer_names
 from traits.api import Enum, Float
+
+
+PointerEnum = Enum('arrow', values=set(pointer_names))
 
 
 class MovableComponent(Container):
     """ A `Container` which can be manipulated by the user
     """
 
-    # Give child components the first crack at events
-    intercept_events = False
-
     # This component is not resizable
     resizable = ''
 
     # We only want two states
     event_state = Enum('normal', 'moving')
+
+    # What should the mouse pointer be when the mouse is over this component?
+    hover_pointer = PointerEnum
 
     # Where did a drag start relative to this component's origin
     _offset_x = Float
@@ -45,6 +49,12 @@ class MovableComponent(Container):
             self.event_state = 'moving'
             event.window.set_mouse_owner(self, event.net_transform())
             event.handled = True
+
+    def normal_mouse_move(self, event):
+        event.window.set_pointer(self.hover_pointer)
+
+    def normal_mouse_leave(self, event):
+        event.window.set_pointer('arrow')
 
     def moving_mouse_move(self, event):
         delta = (event.x - self._offset_x - self.x,

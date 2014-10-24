@@ -1,6 +1,6 @@
 import json
 
-from .linked import LinkedFunction
+from .transfer_function import TransferFunction
 
 
 def build_screen_to_function(component):
@@ -20,16 +20,16 @@ def clip(value, limits):
 
 
 def load_ctf(filename):
-    """ Load a LinkedFunction from a file.
+    """ Load a TransferFunction from a file.
     """
     with open(filename, 'rb') as fp:
         loaded_data = json.load(fp)
-    return LinkedFunction.from_dict(loaded_data)
+    return TransferFunction.from_dict(loaded_data)
 
 
-def save_ctf(linked_func, filename):
-    """ Save a LinkedFunction to a file.
+def save_ctf(transfer_func, filename):
+    """ Save a TransferFunction to a file.
     """
-    function_data = linked_func.to_dict()
+    function_data = transfer_func.to_dict()
     with open(filename, 'wb') as fp:
         json.dump(function_data, fp, indent=1)

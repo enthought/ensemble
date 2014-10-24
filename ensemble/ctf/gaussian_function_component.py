@@ -122,10 +122,10 @@ class GaussianComponent(BaseColorComponent):
         self.node.sync_trait('center', self.opacity_node)
         self.node.sync_trait('radius', self.opacity_node)
 
-    def add_function_nodes(self, linked_function):
+    def add_function_nodes(self, transfer_function):
         """ Add the node(s) for this component.
         """
-        linked_function.add_linked_nodes(self.node, self.opacity_node)
+        transfer_function.add_linked_nodes(self.node, self.opacity_node)
 
     def draw_contents(self, gc):
         """ Draw the component.
@@ -149,24 +149,24 @@ class GaussianComponent(BaseColorComponent):
         rel_x, _ = self.screen_to_relative(delta_x, 0.0)
 
         if self.interaction_state == 'move':
-            center = self.node.center
-            self.set_node_center(self.node, center + rel_x)
+            self.update_node_center(self.node, rel_x)
         elif self.interaction_state == 'resize':
             # XXX: Resize is only on the left side of the component for now.
             # Some debugging will need to happen to get it working on the right
             # side too.
-            radius = self.node.radius
-            self.set_node_radius(self.node, radius - rel_x)
+            self.update_node_radius(self.node, self.node.radius - rel_x)
             self._sync_component_bounds()
             self.opacity_widget.parent_changed(self)
 
         self._sync_component_position()
 
-    def node_limits(self, linked_function):
+    def node_limits(self, transfer_function):
         """ Compute the movement bounds of the function node.
         """
-        color_limits = linked_function.color.node_limits(self.node)
-        opacity_limits = linked_function.opacity.node_limits(self.opacity_node)
+        color_limits = transfer_function.color.node_limits(self.node)
+        opacity_limits = transfer_function.opacity.node_limits(
+            self.opacity_node
+        )
         color_radius = self.node.radius
         opacity_radius = self.opacity_node.radius
         return (max(color_limits[0] + color_radius,
@@ -184,10 +184,10 @@ class GaussianComponent(BaseColorComponent):
         for child in self.components:
             child.parent_changed(self)
 
-    def remove_function_nodes(self, linked_function):
+    def remove_function_nodes(self, transfer_function):
         """ Remove the node(s) for this component.
         """
-        linked_function.remove_linked_nodes(self.node, self.opacity_node)
+        transfer_function.remove_linked_nodes(self.node, self.opacity_node)
 
     # -----------------------------------------------------------------------
     # Enable component methods

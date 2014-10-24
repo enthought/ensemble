@@ -8,10 +8,13 @@ COMPONENT_WIDTH = 6.0
 
 class ColorComponent(BaseColorComponent):
 
-    def add_function_nodes(self, linked_function):
+    # Let the user know that we can be moved
+    hover_pointer = 'hand'
+
+    def add_function_nodes(self, transfer_function):
         """ Add the node(s) for this component.
         """
-        linked_function.color.insert(self.node)
+        transfer_function.color.insert(self.node)
 
     def draw_contents(self, gc):
         """ Draw the component.
@@ -41,13 +44,13 @@ class ColorComponent(BaseColorComponent):
         """ Move the component.
         """
         rel_x, _ = self.screen_to_relative(delta_x, 0.0)
-        self.set_node_center(self.node, self.node.center + rel_x)
+        self.update_node_center(self.node, rel_x)
         self._sync_component_position()
 
-    def node_limits(self, linked_function):
+    def node_limits(self, transfer_function):
         """ Compute the movement bounds of the function node.
         """
-        limits = linked_function.color.node_limits(self.node)
+        limits = transfer_function.color.node_limits(self.node)
         radius = self.node.radius
         return (limits[0] + radius, limits[1] - radius)
 
@@ -58,10 +61,10 @@ class ColorComponent(BaseColorComponent):
         self.bounds = (COMPONENT_WIDTH, parent.bounds[1])
         self._sync_component_position()
 
-    def remove_function_nodes(self, linked_function):
+    def remove_function_nodes(self, transfer_function):
         """ Remove the node(s) for this component.
         """
-        linked_function.color.remove(self.node)
+        transfer_function.color.remove(self.node)
 
     # -----------------------------------------------------------------------
     # Private methods

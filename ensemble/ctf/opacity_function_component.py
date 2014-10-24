@@ -47,14 +47,17 @@ class OpacityNode(FunctionNode):
 
 class OpacityComponent(FunctionComponent):
 
+    # Let the user know that we can be moved
+    hover_pointer = 'hand'
+
     # -----------------------------------------------------------------------
     # FunctionComponent methods
     # -----------------------------------------------------------------------
 
-    def add_function_nodes(self, linked_function):
+    def add_function_nodes(self, transfer_function):
         """ Add the node(s) for this component.
         """
-        linked_function.opacity.insert(self.node)
+        transfer_function.opacity.insert(self.node)
 
     def draw_contents(self, gc):
         """ Draw the component.
@@ -83,13 +86,13 @@ class OpacityComponent(FunctionComponent):
         """
         rel_x, rel_y = self.screen_to_relative(delta_x, delta_y)
         self.node.opacity = clip_to_unit(self.node.opacity + rel_y)
-        self.set_node_center(self.node, self.node.center + rel_x)
+        self.update_node_center(self.node, rel_x)
         self._sync_component_position()
 
-    def node_limits(self, linked_function):
+    def node_limits(self, transfer_function):
         """ Compute the movement bounds of the function node.
         """
-        limits = linked_function.opacity.node_limits(self.node)
+        limits = transfer_function.opacity.node_limits(self.node)
         radius = self.node.radius
         return (limits[0] + radius, limits[1] - radius)
 
@@ -99,10 +102,10 @@ class OpacityComponent(FunctionComponent):
         """
         self._sync_component_position()
 
-    def remove_function_nodes(self, linked_function):
+    def remove_function_nodes(self, transfer_function):
         """ Remove the node(s) for this component.
         """
-        linked_function.opacity.remove(self.node)
+        transfer_function.opacity.remove(self.node)
 
     # -----------------------------------------------------------------------
     # Traits initialization
