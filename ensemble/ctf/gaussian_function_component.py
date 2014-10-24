@@ -138,7 +138,7 @@ class GaussianComponent(BaseColorComponent):
         """
         color_node = _get_node(nodes, GaussianColorNode)
         opacity_node = _get_node(nodes, GaussianOpacityNode)
-        if color_node is None or opacity_node is None:
+        if len(nodes) != 2 and (color_node is None or opacity_node is None):
             raise ValueError('Expecting two Gaussian function nodes!')
 
         return cls(node=color_node, opacity_node=opacity_node)
