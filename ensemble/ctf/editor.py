@@ -60,7 +60,7 @@ class AddGaussianAction(BaseColorAction):
         color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
         opacity_node = GaussianOpacityNode(center=rel_x, max_opacity=rel_y,
                                            radius=rad)
-        component = GaussianComponent(color_node=color_node,
+        component = GaussianComponent(node=color_node,
                                       opacity_node=opacity_node)
         self.container.add_function_component(component)
 
