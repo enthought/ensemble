@@ -103,9 +103,6 @@ class CtfEditor(Container):
     padding_right = 5
     fill_padding = True
 
-    # Give child components the first crack at events
-    intercept_events = False
-
     # -----------------------------------------------------------------------
     # Public interface
     # -----------------------------------------------------------------------

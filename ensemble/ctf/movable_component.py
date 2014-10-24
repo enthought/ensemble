@@ -10,9 +10,6 @@ class MovableComponent(Container):
     """ A `Container` which can be manipulated by the user
     """
 
-    # Give child components the first crack at events
-    intercept_events = False
-
     # This component is not resizable
     resizable = ''
 
