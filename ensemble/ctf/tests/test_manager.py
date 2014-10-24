@@ -7,7 +7,7 @@ import tempfile
 
 from numpy.testing import assert_allclose
 
-from ensemble.ctf.api import CtfManager, LinkedFunction
+from ensemble.ctf.api import CtfManager, TransferFunction
 
 
 @contextmanager
@@ -20,35 +20,35 @@ def temp_directory():
 
 
 def test_ctf_manager_add():
-    linked_func = LinkedFunction()
+    transfer_func = TransferFunction()
 
     with temp_directory() as root_dir:
         manager = CtfManager.from_directory(root_dir)
         for i in range(5):
-            manager.add(str(i), linked_func)
+            manager.add(str(i), transfer_func)
 
         assert len(listdir(root_dir)) == 5
 
 
 def test_ctf_manager_get():
-    linked_func = LinkedFunction()
+    transfer_func = TransferFunction()
 
     with temp_directory() as root_dir:
         manager = CtfManager.from_directory(root_dir)
-        manager.add('test', linked_func)
+        manager.add('test', transfer_func)
 
         ret_func = manager.get('test')
-        assert_allclose(ret_func.color.values(), linked_func.color.values())
+        assert_allclose(ret_func.color.values(), transfer_func.color.values())
         assert_allclose(ret_func.opacity.values(),
-                        linked_func.opacity.values())
+                        transfer_func.opacity.values())
 
 
 def test_ctf_manager_load():
-    linked_func = LinkedFunction()
+    transfer_func = TransferFunction()
 
     with temp_directory() as root_dir:
         manager = CtfManager.from_directory(root_dir)
-        manager.add('test', linked_func)
+        manager.add('test', transfer_func)
 
         del manager
         manager = CtfManager.from_directory(root_dir)
@@ -56,12 +56,12 @@ def test_ctf_manager_load():
 
 
 def _test_ctf_manager_names(names_to_test):
-    linked_func = LinkedFunction()
+    transfer_func = TransferFunction()
     with temp_directory() as root_dir:
         manager = CtfManager.from_directory(root_dir)
 
         for name in names_to_test:
-            manager.add(name, linked_func)
+            manager.add(name, transfer_func)
 
         # Reload and check the names
         manager = CtfManager.from_directory(root_dir)

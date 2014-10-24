@@ -4,7 +4,7 @@ import os
 
 from traits.api import HasStrictTraits, Dict, Instance, List, Str
 
-from .linked import LinkedFunction
+from .transfer_function import TransferFunction
 from .utils import load_ctf, save_ctf
 
 
@@ -30,7 +30,7 @@ class CtfManager(HasStrictTraits):
     names = List(Str)
 
     # The transfer functions by name.
-    functions = Dict(Str, Instance(LinkedFunction))
+    functions = Dict(Str, Instance(TransferFunction))
 
     @classmethod
     def from_directory(cls, root_dir, **traits):
@@ -40,23 +40,23 @@ class CtfManager(HasStrictTraits):
         manager._read_from_dir()
         return manager
 
-    def add(self, name, linked_func):
+    def add(self, name, transfer_func):
         """ Add a transfer function with the given name.
 
         Parameters
         ----------
         name : str
             The name of the transfer function.
-        linked_func : LinkedFunction
-            A linked function instance
+        transfer_func : TransferFunction
+            A transfer function instance
         """
         encoded_name = _name_encode(name)
         fn = os.path.join(self.root_dir, encoded_name + CTF_EXTENSION)
         if not os.path.isdir(self.root_dir):
             os.makedirs(self.root_dir)
 
-        save_ctf(linked_func, fn)
-        self.functions[name] = linked_func
+        save_ctf(transfer_func, fn)
+        self.functions[name] = transfer_func
         self._update_names()
 
     def get(self, name):
@@ -69,8 +69,8 @@ class CtfManager(HasStrictTraits):
 
         Returns
         -------
-        linked_func : LinkedFunction
-            A linked function.
+        transfer_func : TransferFunction
+            A transfer function.
         """
         return self.functions.get(name).copy()
 

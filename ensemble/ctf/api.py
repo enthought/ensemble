@@ -7,8 +7,8 @@ from .gaussian_function_component import (  # noqa
     GaussianColorNode, GaussianOpacityNode, GaussianComponent
 )
 from .gui_utils import get_color  # noqa
-from .linked import LinkedFunction  # noqa
 from .manager import CtfManager  # noqa
 from .opacity_function_component import OpacityNode, OpacityComponent  # noqa
 from .piecewise import PiecewiseFunction  # noqa
+from .transfer_function import TransferFunction  # noqa
 from .utils import load_ctf, save_ctf  # noqa

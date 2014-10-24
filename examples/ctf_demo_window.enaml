@@ -12,8 +12,8 @@ def save_transfer_function(ctf_editor, ctf_manager):
 
 
 def select_transfer_function(ctf_editor, ctf_manager, name):
-    linked_function = ctf_manager.get(name)
-    ctf_editor.function = linked_function
+    transfer_function = ctf_manager.get(name)
+    ctf_editor.function = transfer_function
 
 
 enamldef CtfDemoWindow(Window): pd_view:

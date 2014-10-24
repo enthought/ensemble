@@ -23,7 +23,7 @@ def _get_link(color_node, opacity_node):
     return (color_node, opacity_node)
 
 
-class LinkedFunction(HasStrictTraits):
+class TransferFunction(HasStrictTraits):
     """ A function containing two `PiecewiseFunction` instances which contain
     nodes that are (sometimes) linked.
     """

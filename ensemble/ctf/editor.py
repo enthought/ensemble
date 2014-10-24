@@ -8,9 +8,9 @@ from .color_function_component import ColorNode, ColorComponent
 from .function_component import FunctionComponent
 from .gaussian_function_component import (GaussianComponent, GaussianColorNode,
                                           GaussianOpacityNode)
-from .linked import LinkedFunction
 from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
+from .transfer_function import TransferFunction
 from .utils import build_screen_to_function
 
 
@@ -82,7 +82,7 @@ class CtfEditor(Container):
     """
 
     # The function which is being edited. Contains color and opacity.
-    function = Instance(LinkedFunction)
+    function = Instance(TransferFunction)
 
     # A callable which prompts the user for a color
     # A single keyword argument 'starting_color' will be passed to the callable
@@ -113,7 +113,7 @@ class CtfEditor(Container):
     def add_function_component(self, component):
         self.add(component)
         component.add_function_nodes(self.function)
-        component._linked_function = self.function
+        component._transfer_function = self.function
         self.function.updated = True
         self.request_redraw()
 
@@ -128,7 +128,7 @@ class CtfEditor(Container):
     # -----------------------------------------------------------------------
 
     def _function_default(self):
-        function = LinkedFunction()
+        function = TransferFunction()
         self._add_function_components(function)
 
         return function
@@ -255,11 +255,11 @@ class CtfEditor(Container):
                 if node in linked_colors or node in linked_opacities:
                     continue
                 component = FunctionComponent.from_function_nodes(node)
-                component._linked_function = function
+                component._transfer_function = function
                 component.removable = (idx not in (0, last_index))
                 self.add(component)
 
         for node_pair in function.links:
             component = FunctionComponent.from_function_nodes(*node_pair)
-            component._linked_function = function
+            component._transfer_function = function
             self.add(component)
