@@ -86,7 +86,7 @@ class OpacityComponent(FunctionComponent):
         """
         rel_x, rel_y = self.screen_to_relative(delta_x, delta_y)
         self.node.opacity = clip_to_unit(self.node.opacity + rel_y)
-        self.set_node_center(self.node, self.node.center + rel_x)
+        self.update_node_center(self.node, self.node.center + rel_x)
         self._sync_component_position()
 
     def node_limits(self, transfer_function):
