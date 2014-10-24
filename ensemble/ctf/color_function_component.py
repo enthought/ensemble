@@ -44,7 +44,7 @@ class ColorComponent(BaseColorComponent):
         """ Move the component.
         """
         rel_x, _ = self.screen_to_relative(delta_x, 0.0)
-        self.update_node_center(self.node, self.node.center + rel_x)
+        self.update_node_center(self.node, rel_x)
         self._sync_component_position()
 
     def node_limits(self, transfer_function):

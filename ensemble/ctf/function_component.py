@@ -82,7 +82,7 @@ class FunctionComponent(MovableComponent):
         return (x / float(parent_width), y / float(parent_height))
 
     def update_node_center(self, node, rel_x):
-        node.center = clip(rel_x, self._center_limits)
+        node.center = clip(node.center + rel_x, self._center_limits)
 
     def update_node_radius(self, node, rel_rad):
         min_center, max_center = self._center_limits

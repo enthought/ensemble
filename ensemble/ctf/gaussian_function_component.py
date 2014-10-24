@@ -149,14 +149,12 @@ class GaussianComponent(BaseColorComponent):
         rel_x, _ = self.screen_to_relative(delta_x, 0.0)
 
         if self.interaction_state == 'move':
-            center = self.node.center
-            self.update_node_center(self.node, center + rel_x)
+            self.update_node_center(self.node, rel_x)
         elif self.interaction_state == 'resize':
             # XXX: Resize is only on the left side of the component for now.
             # Some debugging will need to happen to get it working on the right
             # side too.
-            radius = self.node.radius
-            self.update_node_radius(self.node, radius - rel_x)
+            self.update_node_radius(self.node, self.node.radius - rel_x)
             self._sync_component_bounds()
             self.opacity_widget.parent_changed(self)
 
