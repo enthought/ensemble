@@ -129,7 +129,7 @@ class CtfEditor(Container):
 
     def _function_default(self):
         function = TransferFunction()
-        self._add_function_components(function)
+        self._add_components_for_new_function(function)
 
         return function
 
@@ -158,7 +158,7 @@ class CtfEditor(Container):
                 self.remove(child)
 
         if new is not None:
-            self._add_function_components(new)
+            self._add_components_for_new_function(new)
 
         self.request_redraw()
 
@@ -244,7 +244,7 @@ class CtfEditor(Container):
     # Private methods
     # -----------------------------------------------------------------------
 
-    def _add_function_components(self, function):
+    def _add_components_for_new_function(self, function):
         linked_colors, linked_opacities = [], []
         if len(function.links) > 0:
             linked_colors, linked_opacities = zip(*function.links)
