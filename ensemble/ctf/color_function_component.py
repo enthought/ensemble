@@ -8,6 +8,9 @@ COMPONENT_WIDTH = 6.0
 
 class ColorComponent(BaseColorComponent):
 
+    # Let the user know that we can be moved
+    hover_pointer = 'hand'
+
     def add_function_nodes(self, linked_function):
         """ Add the node(s) for this component.
         """

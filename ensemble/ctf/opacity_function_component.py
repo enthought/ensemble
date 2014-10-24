@@ -47,6 +47,9 @@ class OpacityNode(FunctionNode):
 
 class OpacityComponent(FunctionComponent):
 
+    # Let the user know that we can be moved
+    hover_pointer = 'hand'
+
     # -----------------------------------------------------------------------
     # FunctionComponent methods
     # -----------------------------------------------------------------------
