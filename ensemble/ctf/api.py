@@ -1,7 +1,11 @@
-from .color_function_component import ColorNode, ColorComponent  # noqa
+from .base_color_function_component import ColorNode  # noqa
+from .color_function_component import ColorComponent  # noqa
 from .editor import CtfEditor  # noqa
 from .function_component import FunctionComponent  # noqa
 from .function_node import FunctionNode  # noqa
+from .gaussian_function_component import (  # noqa
+    GaussianColorNode, GaussianOpacityNode, GaussianComponent
+)
 from .gui_utils import get_color  # noqa
 from .linked import LinkedFunction  # noqa
 from .manager import CtfManager  # noqa

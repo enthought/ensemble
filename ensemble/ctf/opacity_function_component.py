@@ -83,16 +83,19 @@ class OpacityComponent(FunctionComponent):
         """
         rel_x, rel_y = self.screen_to_relative(delta_x, delta_y)
         self.node.opacity = clip_to_unit(self.node.opacity + rel_y)
-        self.set_node_center(self.node.center + rel_x)
+        self.set_node_center(self.node, self.node.center + rel_x)
         self._sync_component_position()
 
     def node_limits(self, linked_function):
         """ Compute the movement bounds of the function node.
         """
-        return linked_function.opacity.node_limits(self.node)
+        limits = linked_function.opacity.node_limits(self.node)
+        radius = self.node.radius
+        return (limits[0] + radius, limits[1] - radius)
 
     def parent_changed(self, parent):
-        """ Called when the CTF editor bounds change.
+        """ Called when the parent of this component changes instances or
+        bounds.
         """
         self._sync_component_position()
 

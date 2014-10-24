@@ -1,8 +1,8 @@
-from enable.api import Component
-from traits.api import Bool, Enum, Float, Instance, Property, Tuple
+from traits.api import Bool, Float, Instance, Property, Tuple
 
 from .function_node import FunctionNode
 from .linked import LinkedFunction
+from .movable_component import MovableComponent
 from .utils import clip, clip_to_unit
 
 # A place for FunctionNode subclasses to be registered (for deserialization)
@@ -14,8 +14,11 @@ def register_function_component_class(node_class, cls):
     _function_component_class_registry[node_class] = cls
 
 
-class FunctionComponent(Component):
-    """ A `Component` which corresponds to a node in the CTF editor.
+MINIMUM_RADIUS = 0.01
+
+
+class FunctionComponent(MovableComponent):
+    """ A `Container` which corresponds to a node in the CTF editor.
     """
 
     # Can this component be removed?
@@ -24,24 +27,14 @@ class FunctionComponent(Component):
     # The function node for this component
     node = Instance(FunctionNode)
 
-    # We only want two states
-    event_state = Enum('normal', 'moving')
-
     # What are the screen bounds of the parent component
     parent_bounds = Property
-
-    # This component is not resizable
-    resizable = ''
 
     # The linked function where `self.node` lives
     _linked_function = Instance(LinkedFunction)
 
     # Movement limits for `self.node.center`
     _center_limits = Tuple(Float, Float)
-
-    # Where did a drag start relative to this component's origin
-    _offset_x = Float
-    _offset_y = Float
 
     # -----------------------------------------------------------------------
     # FunctionComponent interface
@@ -65,18 +58,8 @@ class FunctionComponent(Component):
         factory = _function_component_class_registry[node.__class__]
         return factory.from_function_nodes(*nodes)
 
-    def move(self, delta_x, delta_y):
-        """ Move the component.
-        """
-        raise NotImplementedError
-
     def node_limits(self, linked_function):
         """ Compute the movement bounds of the function node.
-        """
-        raise NotImplementedError
-
-    def parent_changed(self, parent):
-        """ Called when the CTF editor changes.
         """
         raise NotImplementedError
 
@@ -98,70 +81,40 @@ class FunctionComponent(Component):
         parent_width, parent_height = self.parent_bounds
         return (x / float(parent_width), y / float(parent_height))
 
-    def set_node_center(self, rel_x):
-        self.node.center = clip(rel_x, self._center_limits)
+    def set_node_center(self, node, rel_x):
+        node.center = clip(rel_x, self._center_limits)
+
+    def set_node_radius(self, node, rel_rad):
+        min_center, max_center = self._center_limits
+        center = node.center
+        radius_limit = min(center - min_center, max_center - center)
+        node.radius = max(min(rel_rad, radius_limit), MINIMUM_RADIUS)
+
+    def update_function(self):
+        # Let the world know that the function has changed.
+        if self._linked_function is not None:
+            self._linked_function.updated = True
 
     # -----------------------------------------------------------------------
     # Traits handlers
     # -----------------------------------------------------------------------
-
-    def _container_changed(self, old, new):
-        super(FunctionComponent, self)._container_changed(old, new)
-        if new is not None:
-            self.parent_changed(new)
 
     def _get_parent_bounds(self):
         return self.container.bounds
 
     def _event_state_changed(self, new):
         if new == 'moving':
-            radius = self.node.radius
-            min_center, max_center = self.node_limits(self._linked_function)
-            self._center_limits = (min_center + radius, max_center - radius)
+            self._center_limits = self.node_limits(self._linked_function)
         elif new == 'normal':
             self._center_limits = (0.0, 1.0)
 
     # -----------------------------------------------------------------------
-    # Enable event handlers
+    # Enable Component methods
     # -----------------------------------------------------------------------
-
-    def normal_left_down(self, event):
-        if self._event_in_bounds(event):
-            self._offset_x = event.x - self.x
-            self._offset_y = event.y - self.y
-            self.event_state = 'moving'
-            event.window.set_mouse_owner(self, event.net_transform())
-            event.handled = True
 
     def moving_mouse_move(self, event):
-        delta = (event.x - self._offset_x - self.x,
-                 event.y - self._offset_y - self.y)
-        self.move(*delta)
-        event.handled = True
-        self._linked_function.updated = True
-
-    def moving_left_up(self, event):
-        self.event_state = 'normal'
-        event.window.set_mouse_owner(None)
-        event.handled = True
-        self.request_redraw()
-
-    def moving_mouse_leave(self, event):
-        self.moving_left_up(event)
-        event.handled = True
-
-    # -----------------------------------------------------------------------
-    # Enable draw handlers
-    # -----------------------------------------------------------------------
+        super(FunctionComponent, self).moving_mouse_move(event)
+        self.update_function()
 
     def _draw_overlay(self, gc, view_bounds=None, mode='default'):
         self.draw_contents(gc)
-
-    # -----------------------------------------------------------------------
-    # Private methods
-    # -----------------------------------------------------------------------
-
-    def _event_in_bounds(self, event):
-        x, y, ex, ey = self.x, self.y, event.x, event.y
-        w, h = self.bounds
-        return (ex > x and ey > y and (ex - x) < w and (ey - y) < h)
