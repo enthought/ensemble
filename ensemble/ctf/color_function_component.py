@@ -1,68 +1,12 @@
-from pyface.action.api import Action
-from traits.api import Callable, Float, Tuple, Instance
-
-from .function_component import (FunctionComponent,
-                                 register_function_component_class)
-from .function_node import FunctionNode, register_function_node_class
-from .linked import LinkedFunction
-from .menu_tool import RemoveComponentAction, menu_tool_with_actions
+from .base_color_function_component import BaseColorComponent, ColorNode
+from .function_component import register_function_component_class
+from .function_node import register_function_node_class
 
 
 COMPONENT_WIDTH = 6.0
 
 
-class EditColorAction(Action):
-    name = 'Edit Color...'
-
-    # The ColorComponent being edited.
-    component = Instance(FunctionComponent)
-
-    # The function where our node lives
-    function = Instance(LinkedFunction)
-
-    # A callable which prompts the user for a color
-    prompt_color = Callable
-
-    def perform(self, event):
-        new_color = self.prompt_color()
-        if new_color is None:
-            return
-
-        self.component.node.color = new_color
-        self.function.updated = True
-
-
-class ColorNode(FunctionNode):
-    """ A `FunctionNode` representing a single color.
-    """
-
-    # The color for this node
-    color = Tuple(Float, Float, Float)
-
-    def copy(self):
-        obj = super(ColorNode, self).copy()
-        obj.color = self.color
-        return obj
-
-    @classmethod
-    def from_dict(cls, dictionary):
-        """ Create an instance from the data in `dictionary`.
-        """
-        return cls(center=dictionary['center'], radius=dictionary['radius'],
-                   color=tuple(dictionary['color']))
-
-    def to_dict(self):
-        """ Create a dictionary which represents the state of the node.
-        """
-        dictionary = super(ColorNode, self).to_dict()
-        dictionary['color'] = self.color
-        return dictionary
-
-    def values(self):
-        return [(self.center,) + self.color]
-
-
-class ColorComponent(FunctionComponent):
+class ColorComponent(BaseColorComponent):
 
     def add_function_nodes(self, linked_function):
         """ Add the node(s) for this component.
@@ -97,16 +41,19 @@ class ColorComponent(FunctionComponent):
         """ Move the component.
         """
         rel_x, _ = self.screen_to_relative(delta_x, 0.0)
-        self.set_node_center(self.node.center + rel_x)
+        self.set_node_center(self.node, self.node.center + rel_x)
         self._sync_component_position()
 
     def node_limits(self, linked_function):
         """ Compute the movement bounds of the function node.
         """
-        return linked_function.color.node_limits(self.node)
+        limits = linked_function.color.node_limits(self.node)
+        radius = self.node.radius
+        return (limits[0] + radius, limits[1] - radius)
 
     def parent_changed(self, parent):
-        """ Called when the CTF editor bounds change.
+        """ Called when the parent of this component changes instances or
+        bounds.
         """
         self.bounds = (COMPONENT_WIDTH, parent.bounds[1])
         self._sync_component_position()
@@ -115,20 +62,6 @@ class ColorComponent(FunctionComponent):
         """ Remove the node(s) for this component.
         """
         linked_function.color.remove(self.node)
-
-    # -----------------------------------------------------------------------
-    # Traits methods
-    # -----------------------------------------------------------------------
-
-    def _tools_default(self):
-        prompt_color = self.container.prompt_color_selection
-        function = self.container.function
-        actions = [
-            EditColorAction(component=self, function=function,
-                            prompt_color=prompt_color),
-            RemoveComponentAction(component=self),
-        ]
-        return [menu_tool_with_actions(self, actions)]
 
     # -----------------------------------------------------------------------
     # Private methods

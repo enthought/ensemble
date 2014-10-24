@@ -6,13 +6,18 @@ from traits.api import Callable, Either, Instance, Tuple, on_trait_change
 
 from .color_function_component import ColorNode, ColorComponent
 from .function_component import FunctionComponent
+from .gaussian_function_component import (GaussianComponent, GaussianColorNode,
+                                          GaussianOpacityNode)
 from .linked import LinkedFunction
 from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
 from .utils import build_screen_to_function
 
 
-class BaseCtfAction(Action):
+GAUSSIAN_INITIAL_RADIUS = 0.025
+
+
+class BaseCtfEditorAction(Action):
     container = Instance(Container)
     screen_to_function = Callable
 
@@ -20,36 +25,55 @@ class BaseCtfAction(Action):
         return build_screen_to_function(self.container)
 
 
-class AddColorAction(BaseCtfAction):
-    name = 'Add Color...'
-
+class BaseColorAction(BaseCtfEditorAction):
     # A callable which prompts the user for a color
     prompt_color = Callable
 
     def perform(self, event):
-        new_color = self.prompt_color()
-        if new_color is None:
+        color = self.prompt_color()
+        if color is None:
             return
 
+        self.perform_with_color(event, color)
+
+
+class AddColorAction(BaseColorAction):
+    name = 'Add Color...'
+
+    def perform_with_color(self, event, color):
         screen_position = (event.enable_event.x, 0.0)
         rel_x, _ = self.screen_to_function(screen_position)
-        node = ColorNode(center=rel_x, color=new_color)
-        component = ColorComponent(node=node,
-                                   _linked_function=self.container.function)
 
+        node = ColorNode(center=rel_x, color=color)
+        component = ColorComponent(node=node)
         self.container.add_function_component(component)
 
 
-class AddOpacityAction(BaseCtfAction):
+class AddGaussianAction(BaseColorAction):
+    name = 'Add Gaussian...'
+
+    def perform_with_color(self, event, color):
+        screen_position = (event.enable_event.x, event.enable_event.y)
+        rel_x, rel_y = self.screen_to_function(screen_position)
+        rad = GAUSSIAN_INITIAL_RADIUS
+
+        color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
+        opacity_node = GaussianOpacityNode(center=rel_x, max_opacity=rel_y,
+                                           radius=rad)
+        component = GaussianComponent(node=color_node,
+                                      opacity_node=opacity_node)
+        self.container.add_function_component(component)
+
+
+class AddOpacityAction(BaseCtfEditorAction):
     name = 'Add Opacity'
 
     def perform(self, event):
         screen_position = (event.enable_event.x, event.enable_event.y)
         rel_x, rel_y = self.screen_to_function(screen_position)
-        node = OpacityNode(center=rel_x, opacity=rel_y)
-        component = OpacityComponent(node=node,
-                                     _linked_function=self.container.function)
 
+        node = OpacityNode(center=rel_x, opacity=rel_y)
+        component = OpacityComponent(node=node)
         self.container.add_function_component(component)
 
 
@@ -89,6 +113,7 @@ class CtfEditor(Container):
     def add_function_component(self, component):
         self.add(component)
         component.add_function_nodes(self.function)
+        component._linked_function = self.function
         self.function.updated = True
         self.request_redraw()
 
@@ -112,6 +137,7 @@ class CtfEditor(Container):
         prompt_color = self.prompt_color_selection
         actions = [
             AddColorAction(container=self, prompt_color=prompt_color),
+            AddGaussianAction(container=self, prompt_color=prompt_color),
             AddOpacityAction(container=self),
         ]
         return [menu_tool_with_actions(self, actions)]
@@ -219,10 +245,21 @@ class CtfEditor(Container):
     # -----------------------------------------------------------------------
 
     def _add_function_components(self, function):
+        linked_colors, linked_opacities = [], []
+        if len(function.links) > 0:
+            linked_colors, linked_opacities = zip(*function.links)
+
         for func in (function.color, function.opacity):
             last_index = func.size() - 1
             for idx, node in enumerate(func.nodes):
+                if node in linked_colors or node in linked_opacities:
+                    continue
                 component = FunctionComponent.from_function_nodes(node)
                 component._linked_function = function
                 component.removable = (idx not in (0, last_index))
                 self.add(component)
+
+        for node_pair in function.links:
+            component = FunctionComponent.from_function_nodes(*node_pair)
+            component._linked_function = function
+            self.add(component)
