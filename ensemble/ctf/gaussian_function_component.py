@@ -152,6 +152,9 @@ class GaussianComponent(BaseColorComponent):
             center = self.node.center
             self.set_node_center(self.node, center + rel_x)
         elif self.interaction_state == 'resize':
+            # XXX: Resize is only on the left side of the component for now.
+            # Some debugging will need to happen to get it working on the right
+            # side too.
             radius = self.node.radius
             self.set_node_radius(self.node, radius - rel_x)
             self._sync_component_bounds()
