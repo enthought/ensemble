@@ -1,4 +1,4 @@
-from traits.api import HasStrictTraits, Event, Instance, List
+from traits.api import HasStrictTraits, Event, Instance, List, Property
 
 from .piecewise import PiecewiseFunction
 
@@ -34,8 +34,12 @@ class TransferFunction(HasStrictTraits):
     # The opacities
     opacity = Instance(PiecewiseFunction)
 
+    # The `links` trait as a list of index pairs. Get/Set are both implemented
+    # NOTE: This is here to support serialization
+    linked_indices = Property(List, depends_on=['links', 'color', 'opacity'])
+
     # The nodes in `color` and `opacity` which exist as a pair.
-    links = List([])
+    links = List
 
     # An event that should fire when the function is updated
     updated = Event
@@ -58,13 +62,15 @@ class TransferFunction(HasStrictTraits):
         self.links.remove(link)
 
     def copy(self):
-        link_indices = self._links_as_indices()
+        cls = type(self)
         color = self.color.copy()
         opacity = self.opacity.copy()
-        links = self._links_from_indices(color, opacity, link_indices)
+        other = cls(color=color, opacity=opacity)
 
-        cls = type(self)
-        return cls(color=color, opacity=opacity, links=links)
+        # Add the links last
+        other.linked_indices = self.linked_indices
+
+        return other
 
     @classmethod
     def from_dict(cls, dictionary):
@@ -73,11 +79,12 @@ class TransferFunction(HasStrictTraits):
         piecewise_from_dict = PiecewiseFunction.from_dict
         color = piecewise_from_dict(dictionary.get('color', {}))
         opacity = piecewise_from_dict(dictionary.get('opacity', {}))
+        function = cls(color=color, opacity=opacity)
 
-        link_indices = dictionary.get('links', [])
-        links = cls._links_from_indices(color, opacity, link_indices)
+        # Add the links last
+        function.linked_indices = dictionary.get('links', [])
 
-        return cls(color=color, opacity=opacity, links=links)
+        return function
 
     def to_dict(self):
         """ Flatten the function into a dictionary.
@@ -85,11 +92,11 @@ class TransferFunction(HasStrictTraits):
         return {
             'color': self.color.to_dict(),
             'opacity': self.opacity.to_dict(),
-            'links': self._links_as_indices(),
+            'links': self.linked_indices,
         }
 
     # -----------------------------------------------------------------------
-    # Traits initialization
+    # Traits
     # -----------------------------------------------------------------------
 
     def _color_default(self):
@@ -98,17 +105,11 @@ class TransferFunction(HasStrictTraits):
     def _opacity_default(self):
         return PiecewiseFunction.from_dict(OPACITY_DEFAULT)
 
-    # -----------------------------------------------------------------------
-    # Private interface
-    # -----------------------------------------------------------------------
-
-    def _links_as_indices(self):
-        """ Return the list of a links as a list of indices.
-        """
+    def _get_linked_indices(self):
         return [(self.color.index_of(c), self.opacity.index_of(o))
                 for c, o in self.links]
 
-    @staticmethod
-    def _links_from_indices(color, opacity, indices):
-        return [(color.node_at(c_idx), opacity.node_at(o_idx))
-                for c_idx, o_idx in indices]
+    def _set_linked_indices(self, indices):
+        color, opacity = self.color, self.opacity
+        self.links = [(color.node_at(c_idx), opacity.node_at(o_idx))
+                      for c_idx, o_idx in indices]
