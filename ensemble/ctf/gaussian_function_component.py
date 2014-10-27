@@ -53,6 +53,9 @@ class GaussianOpacityNode(OpacityNode):
 class GaussianHeightWidget(MovableComponent):
     """ A widget for setting the `opacity` of a `GaussianOpacityNode`.
     """
+
+    hover_pointer = "size top"
+
     node = Instance(GaussianOpacityNode)
 
     screen_to_relative = Callable
@@ -188,9 +191,11 @@ class GaussianComponent(BaseColorComponent):
             self.interaction_state = 'move'
 
         event.window.set_pointer(POINTER_MAP[self.interaction_state])
+        event.handled = True
 
     def normal_mouse_leave(self, event):
         event.window.set_pointer('arrow')
+        event.handled = True
 
     # -----------------------------------------------------------------------
     # Traits methods
