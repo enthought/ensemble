@@ -14,7 +14,7 @@ def register_function_component_class(node_class, cls):
     _function_component_class_registry[node_class] = cls
 
 
-MINIMUM_RADIUS = 0.01
+MINIMUM_RADIUS = 0.03
 
 
 class FunctionComponent(MovableComponent):

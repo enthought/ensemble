@@ -1,8 +1,11 @@
-from traits.api import Callable, Enum, Float, Instance, on_trait_change
+import numpy as np
+from scipy.signal import gaussian
+
+from traits.api import Callable, Enum, Instance, on_trait_change
 
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
-from .function_node import FunctionNode, register_function_node_class
+from .function_node import register_function_node_class
 from .movable_component import MovableComponent
 from .opacity_function_component import OpacityNode
 from .utils import clip_to_unit
@@ -13,6 +16,9 @@ RESIZE_THRESHOLD = 7.0
 BLACK = (0.0, 0.0, 0.0, 1.0)
 GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
+MIN_GAUSSIAN_STD = 2.0
+GAUSSIAN_RADIUS_STD_SCALE = 50.0
+MAX_GAUSSIAN_NUM_SAMPLES = 256
 
 
 def _get_node(nodes, node_class):
@@ -35,8 +41,12 @@ class GaussianOpacityNode(OpacityNode):
     """
     def values(self):
         center, radius = self.center, self.radius
-        return [(center - radius, 0.0), (center, self.opacity),
-                (center + radius, 0.0)]
+        std = max(MIN_GAUSSIAN_STD, radius * GAUSSIAN_RADIUS_STD_SCALE)
+        num_samples = int(np.round(radius * 2.0 * MAX_GAUSSIAN_NUM_SAMPLES))
+
+        xs = np.linspace(center - radius, center + radius, num_samples)
+        ys = gaussian(num_samples, std=std) * self.opacity
+        return zip(xs, ys)
 
 
 class GaussianHeightWidget(MovableComponent):
