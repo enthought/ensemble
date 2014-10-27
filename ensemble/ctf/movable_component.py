@@ -52,9 +52,11 @@ class MovableComponent(Container):
 
     def normal_mouse_move(self, event):
         event.window.set_pointer(self.hover_pointer)
+        event.handled = True
 
     def normal_mouse_leave(self, event):
         event.window.set_pointer('arrow')
+        event.handled = True
 
     def moving_mouse_move(self, event):
         delta = (event.x - self._offset_x - self.x,

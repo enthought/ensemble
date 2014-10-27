@@ -6,15 +6,14 @@ from traits.api import Callable, Either, Instance, Tuple, on_trait_change
 
 from .color_function_component import ColorNode, ColorComponent
 from .function_component import FunctionComponent
-from .gaussian_function_component import (GaussianComponent, GaussianColorNode,
-                                          GaussianOpacityNode)
+from .gaussian_function_component import (
+    GaussianComponent, GaussianColorNode, GaussianOpacityNode,
+    GAUSSIAN_MINIMUM_RADIUS
+)
 from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
 from .transfer_function import TransferFunction
 from .utils import build_screen_to_function
-
-
-GAUSSIAN_INITIAL_RADIUS = 0.025
 
 
 class BaseCtfEditorAction(Action):
@@ -55,10 +54,10 @@ class AddGaussianAction(BaseColorAction):
     def perform_with_color(self, event, color):
         screen_position = (event.enable_event.x, event.enable_event.y)
         rel_x, rel_y = self.screen_to_function(screen_position)
-        rad = GAUSSIAN_INITIAL_RADIUS
+        rad = GAUSSIAN_MINIMUM_RADIUS
 
         color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
-        opacity_node = GaussianOpacityNode(center=rel_x, max_opacity=rel_y,
+        opacity_node = GaussianOpacityNode(center=rel_x, opacity=rel_y,
                                            radius=rad)
         component = GaussianComponent(node=color_node,
                                       opacity_node=opacity_node)

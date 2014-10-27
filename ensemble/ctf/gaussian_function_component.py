@@ -1,9 +1,13 @@
-from traits.api import Callable, Enum, Float, Instance, on_trait_change
+import numpy as np
+from scipy.signal import gaussian
+
+from traits.api import Callable, Enum, Instance, on_trait_change
 
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
-from .function_node import FunctionNode, register_function_node_class
+from .function_node import register_function_node_class
 from .movable_component import MovableComponent
+from .opacity_function_component import OpacityNode
 from .utils import clip_to_unit
 
 
@@ -12,6 +16,10 @@ RESIZE_THRESHOLD = 7.0
 BLACK = (0.0, 0.0, 0.0, 1.0)
 GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
+MIN_GAUSSIAN_STD = 2.0
+GAUSSIAN_RADIUS_STD_SCALE = 50.0
+MAX_GAUSSIAN_NUM_SAMPLES = 256
+GAUSSIAN_MINIMUM_RADIUS = 0.03
 
 
 def _get_node(nodes, node_class):
@@ -29,49 +37,34 @@ class GaussianColorNode(ColorNode):
         return [(start_x,) + self.color, (end_x,) + self.color]
 
 
-class GaussianOpacityNode(FunctionNode):
-    """ A `FunctionNode` representing opacity with a Gaussian shape.
+class GaussianOpacityNode(OpacityNode):
+    """ An `OpacityNode` with a non-zero radius and a Gaussian shape.
     """
-    # The maximum opacity for this node
-    max_opacity = Float
-
-    def copy(self):
-        obj = super(GaussianOpacityNode, self).copy()
-        obj.max_opacity = self.max_opacity
-        return obj
-
-    @classmethod
-    def from_dict(cls, dictionary):
-        """ Create an instance from the data in `dictionary`.
-        """
-        return cls(center=dictionary['center'], radius=dictionary['radius'],
-                   max_opacity=dictionary['max_opacity'])
-
-    def to_dict(self):
-        """ Create a dictionary which represents the state of the node.
-        """
-        dictionary = super(GaussianOpacityNode, self).to_dict()
-        dictionary['max_opacity'] = self.max_opacity
-        return dictionary
-
     def values(self):
         center, radius = self.center, self.radius
-        return [(center - radius, 0.0), (center, self.max_opacity),
-                (center + radius, 0.0)]
+        std = max(MIN_GAUSSIAN_STD, radius * GAUSSIAN_RADIUS_STD_SCALE)
+        num_samples = int(np.round(radius * 2.0 * MAX_GAUSSIAN_NUM_SAMPLES))
+
+        xs = np.linspace(center - radius, center + radius, num_samples)
+        ys = gaussian(num_samples, std=std) * self.opacity
+        return zip(xs, ys)
 
 
 class GaussianHeightWidget(MovableComponent):
-    """ A widget for setting the `max_opacity` of a `GaussianOpacityNode`.
+    """ A widget for setting the `opacity` of a `GaussianOpacityNode`.
     """
+
+    hover_pointer = "size top"
+
     node = Instance(GaussianOpacityNode)
 
     screen_to_relative = Callable
     relative_to_screen = Callable
 
     def move(self, delta_x, delta_y):
-        opacity = self.node.max_opacity
+        opacity = self.node.opacity
         _, rel_y = self.screen_to_relative(delta_x, delta_y)
-        self.node.max_opacity = clip_to_unit(opacity + rel_y)
+        self.node.opacity = clip_to_unit(opacity + rel_y)
 
         self._sync_component_position()
         self.request_redraw()
@@ -91,7 +84,7 @@ class GaussianHeightWidget(MovableComponent):
 
     def _sync_component_position(self):
         if self.container.container is not None:
-            _, screen_y = self.relative_to_screen(0.0, self.node.max_opacity)
+            _, screen_y = self.relative_to_screen(0.0, self.node.opacity)
             self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2.0)
 
 
@@ -154,7 +147,7 @@ class GaussianComponent(BaseColorComponent):
             # XXX: Resize is only on the left side of the component for now.
             # Some debugging will need to happen to get it working on the right
             # side too.
-            self.update_node_radius(self.node, self.node.radius - rel_x)
+            self._update_node_radius(self.node, self.node.radius - rel_x)
             self._sync_component_bounds()
             self.opacity_widget.parent_changed(self)
 
@@ -167,12 +160,8 @@ class GaussianComponent(BaseColorComponent):
         opacity_limits = transfer_function.opacity.node_limits(
             self.opacity_node
         )
-        color_radius = self.node.radius
-        opacity_radius = self.opacity_node.radius
-        return (max(color_limits[0] + color_radius,
-                    opacity_limits[0] + opacity_radius),
-                min(color_limits[1] - color_radius,
-                    opacity_limits[1] - opacity_radius))
+        return (max(color_limits[0], opacity_limits[0]),
+                min(color_limits[1], opacity_limits[1]))
 
     def parent_changed(self, parent):
         """ Called when the parent of this component changes instances or
@@ -202,15 +191,17 @@ class GaussianComponent(BaseColorComponent):
             self.interaction_state = 'move'
 
         event.window.set_pointer(POINTER_MAP[self.interaction_state])
+        event.handled = True
 
     def normal_mouse_leave(self, event):
         event.window.set_pointer('arrow')
+        event.handled = True
 
     # -----------------------------------------------------------------------
     # Traits methods
     # -----------------------------------------------------------------------
 
-    @on_trait_change('opacity_node.max_opacity')
+    @on_trait_change('opacity_node.opacity')
     def _node_values_changed(self):
         if not self.traits_inited():
             return
@@ -232,6 +223,12 @@ class GaussianComponent(BaseColorComponent):
         center, radius = self.node.center, self.node.radius
         screen_x, _ = self.relative_to_screen(center - radius, 0.0)
         self.position = (screen_x, 0.0)
+
+    def _update_node_radius(self, node, rel_rad):
+        min_center, max_center = self._center_limits
+        center = node.center
+        radius_limit = min(center - min_center, max_center - center)
+        node.radius = max(min(rel_rad, radius_limit), GAUSSIAN_MINIMUM_RADIUS)
 
 
 # Register our function node
