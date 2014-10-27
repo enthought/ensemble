@@ -19,6 +19,7 @@ POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MIN_GAUSSIAN_STD = 2.0
 GAUSSIAN_RADIUS_STD_SCALE = 50.0
 MAX_GAUSSIAN_NUM_SAMPLES = 256
+GAUSSIAN_MINIMUM_RADIUS = 0.03
 
 
 def _get_node(nodes, node_class):
@@ -143,7 +144,7 @@ class GaussianComponent(BaseColorComponent):
             # XXX: Resize is only on the left side of the component for now.
             # Some debugging will need to happen to get it working on the right
             # side too.
-            self.update_node_radius(self.node, self.node.radius - rel_x)
+            self._update_node_radius(self.node, self.node.radius - rel_x)
             self._sync_component_bounds()
             self.opacity_widget.parent_changed(self)
 
@@ -156,12 +157,8 @@ class GaussianComponent(BaseColorComponent):
         opacity_limits = transfer_function.opacity.node_limits(
             self.opacity_node
         )
-        color_radius = self.node.radius
-        opacity_radius = self.opacity_node.radius
-        return (max(color_limits[0] + color_radius,
-                    opacity_limits[0] + opacity_radius),
-                min(color_limits[1] - color_radius,
-                    opacity_limits[1] - opacity_radius))
+        return (max(color_limits[0], opacity_limits[0]),
+                min(color_limits[1], opacity_limits[1]))
 
     def parent_changed(self, parent):
         """ Called when the parent of this component changes instances or
@@ -221,6 +218,12 @@ class GaussianComponent(BaseColorComponent):
         center, radius = self.node.center, self.node.radius
         screen_x, _ = self.relative_to_screen(center - radius, 0.0)
         self.position = (screen_x, 0.0)
+
+    def _update_node_radius(self, node, rel_rad):
+        min_center, max_center = self._center_limits
+        center = node.center
+        radius_limit = min(center - min_center, max_center - center)
+        node.radius = max(min(rel_rad, radius_limit), GAUSSIAN_MINIMUM_RADIUS)
 
 
 # Register our function node

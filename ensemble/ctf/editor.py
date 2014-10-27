@@ -5,9 +5,11 @@ from pyface.action.api import Action
 from traits.api import Callable, Either, Instance, Tuple, on_trait_change
 
 from .color_function_component import ColorNode, ColorComponent
-from .function_component import FunctionComponent, MINIMUM_RADIUS
-from .gaussian_function_component import (GaussianComponent, GaussianColorNode,
-                                          GaussianOpacityNode)
+from .function_component import FunctionComponent
+from .gaussian_function_component import (
+    GaussianComponent, GaussianColorNode, GaussianOpacityNode,
+    GAUSSIAN_MINIMUM_RADIUS
+)
 from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
 from .transfer_function import TransferFunction
@@ -52,7 +54,7 @@ class AddGaussianAction(BaseColorAction):
     def perform_with_color(self, event, color):
         screen_position = (event.enable_event.x, event.enable_event.y)
         rel_x, rel_y = self.screen_to_function(screen_position)
-        rad = MINIMUM_RADIUS
+        rad = GAUSSIAN_MINIMUM_RADIUS
 
         color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
         opacity_node = GaussianOpacityNode(center=rel_x, opacity=rel_y,
