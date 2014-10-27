@@ -58,7 +58,7 @@ class AddGaussianAction(BaseColorAction):
         rad = GAUSSIAN_INITIAL_RADIUS
 
         color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
-        opacity_node = GaussianOpacityNode(center=rel_x, max_opacity=rel_y,
+        opacity_node = GaussianOpacityNode(center=rel_x, opacity=rel_y,
                                            radius=rad)
         component = GaussianComponent(node=color_node,
                                       opacity_node=opacity_node)

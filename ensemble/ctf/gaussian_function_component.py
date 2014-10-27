@@ -4,6 +4,7 @@ from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
 from .function_node import FunctionNode, register_function_node_class
 from .movable_component import MovableComponent
+from .opacity_function_component import OpacityNode
 from .utils import clip_to_unit
 
 
@@ -29,39 +30,17 @@ class GaussianColorNode(ColorNode):
         return [(start_x,) + self.color, (end_x,) + self.color]
 
 
-class GaussianOpacityNode(FunctionNode):
-    """ A `FunctionNode` representing opacity with a Gaussian shape.
+class GaussianOpacityNode(OpacityNode):
+    """ An `OpacityNode` with a non-zero radius and a Gaussian shape.
     """
-    # The maximum opacity for this node
-    max_opacity = Float
-
-    def copy(self):
-        obj = super(GaussianOpacityNode, self).copy()
-        obj.max_opacity = self.max_opacity
-        return obj
-
-    @classmethod
-    def from_dict(cls, dictionary):
-        """ Create an instance from the data in `dictionary`.
-        """
-        return cls(center=dictionary['center'], radius=dictionary['radius'],
-                   max_opacity=dictionary['max_opacity'])
-
-    def to_dict(self):
-        """ Create a dictionary which represents the state of the node.
-        """
-        dictionary = super(GaussianOpacityNode, self).to_dict()
-        dictionary['max_opacity'] = self.max_opacity
-        return dictionary
-
     def values(self):
         center, radius = self.center, self.radius
-        return [(center - radius, 0.0), (center, self.max_opacity),
+        return [(center - radius, 0.0), (center, self.opacity),
                 (center + radius, 0.0)]
 
 
 class GaussianHeightWidget(MovableComponent):
-    """ A widget for setting the `max_opacity` of a `GaussianOpacityNode`.
+    """ A widget for setting the `opacity` of a `GaussianOpacityNode`.
     """
     node = Instance(GaussianOpacityNode)
 
@@ -69,9 +48,9 @@ class GaussianHeightWidget(MovableComponent):
     relative_to_screen = Callable
 
     def move(self, delta_x, delta_y):
-        opacity = self.node.max_opacity
+        opacity = self.node.opacity
         _, rel_y = self.screen_to_relative(delta_x, delta_y)
-        self.node.max_opacity = clip_to_unit(opacity + rel_y)
+        self.node.opacity = clip_to_unit(opacity + rel_y)
 
         self._sync_component_position()
         self.request_redraw()
@@ -91,7 +70,7 @@ class GaussianHeightWidget(MovableComponent):
 
     def _sync_component_position(self):
         if self.container.container is not None:
-            _, screen_y = self.relative_to_screen(0.0, self.node.max_opacity)
+            _, screen_y = self.relative_to_screen(0.0, self.node.opacity)
             self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2.0)
 
 
@@ -210,7 +189,7 @@ class GaussianComponent(BaseColorComponent):
     # Traits methods
     # -----------------------------------------------------------------------
 
-    @on_trait_change('opacity_node.max_opacity')
+    @on_trait_change('opacity_node.opacity')
     def _node_values_changed(self):
         if not self.traits_inited():
             return
