@@ -48,7 +48,9 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
                 data_source, figure=scene_model.mayavi_scene,
                 plane_orientation=axis + '_axes',
             )
-            ipw.module_manager.scalar_lut_manager.lut_mode = 'gray'
+            lut_manager = ipw.module_manager.scalar_lut_manager
+            lut_manager.lut_mode = CUT_COLORMAPS[self.selected_cut_color_map]
+            ipw.ipw.texture_plane_property.opacity = self.slicer_alpha
             ipw.visible = False
             setattr(self, 'image_plane_widget_' + axis, ipw)
 
