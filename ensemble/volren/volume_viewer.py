@@ -1,8 +1,8 @@
 import numpy as np
 
 from mayavi.core.ui.api import MlabSceneModel
-from traits.api import (Bool, CInt, Dict, HasTraits, Instance, List, Str,
-                        on_trait_change)
+from traits.api import (Bool, CInt, Dict, Event, HasTraits, Instance, List,
+                        Str, on_trait_change)
 from tvtk.api import tvtk
 
 from ensemble.ctf.api import CtfEditor, get_color
@@ -37,6 +37,9 @@ class VolumeViewer(HasTraits):
 
     # Additional members of the scene
     scene_members = Dict(Str, Instance(ABCVolumeSceneMember))
+
+    # An event fired once the scene has been initialized.
+    scene_initialized = Event
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -112,6 +115,9 @@ class VolumeViewer(HasTraits):
         # Keep the view always pointing up
         interactor = self.model.scene.interactor
         interactor.interactor_style = tvtk.InteractorStyleTerrain()
+
+        # Let other code know that the scene is ready.
+        self.scene_initialized = True
 
     # -------------------------------------------------------------------------
     # Private methods
