@@ -9,11 +9,12 @@ from ensemble.volren.volume_axes import VolumeAxes
 from ensemble.volren.volume_bounding_box import VolumeBoundingBox
 from ensemble.volren.volume_cut_planes import VolumeCutPlanes
 from ensemble.volren.volume_data import VolumeData
-from ensemble.volren.volume_viewer import VolumeViewer
+from ensemble.volren.volume_viewer import VolumeViewer, CLIP_MAX
 
 
 AXES_ACTOR_CLASS = tvtk.CubeAxesActor
 CUT_PLANE_ACTOR_CLASS = tvtk.ImagePlaneWidget
+CLIP_BOUNDS = [0, CLIP_MAX/2, 0, CLIP_MAX/2, 0, CLIP_MAX/2]
 
 
 def count_types(type_class, obj_list):
@@ -43,7 +44,8 @@ enamldef MainView(Container): view:
         scene_members = [VolumeAxes(visible_axis_scales=(True, True, True)),
                          VolumeBoundingBox(), VolumeCutPlanes()]
         self.viewer = VolumeViewer(volume_data=volume_data,
-                                   scene_members=scene_members)
+                                   scene_members=scene_members,
+                                   clip_bounds=CLIP_BOUNDS)
         self.view, _ = self.parse_and_create(enaml_source,
                                              viewer=self.viewer)
 
@@ -68,6 +70,9 @@ enamldef MainView(Container): view:
 
         self.assertEqual(axes_count, 1)
         self.assertEqual(cutplane_count, 3)
+
+    def test_renderer_clipping_bounds(self):
+        self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
 
     def test_renderer_screenshot(self):
         image_array = self.viewer.screenshot()
