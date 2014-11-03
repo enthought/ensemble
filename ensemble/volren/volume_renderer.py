@@ -151,6 +151,9 @@ class VolumeRenderer(HasStrictTraits):
         self.set_transfer_function()
 
     def _set_volume_clip_planes(self):
+        if self.data is None:
+            return
+
         bounds = [b/CLIP_MAX for b in self.data.bounds]
         mn = [bounds[i]*pos for i, pos in enumerate(self.clip_bounds[::2])]
         mx = [bounds[i]*pos for i, pos in enumerate(self.clip_bounds[1::2])]

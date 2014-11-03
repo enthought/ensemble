@@ -80,6 +80,9 @@ class VolumeViewer(HasTraits):
     def _volume_data_changed(self):
         self.volume_renderer.data = self.volume_data
 
+    def _clip_bounds_changed(self):
+        self.volume_renderer.clip_bounds = self.clip_bounds[:]
+
     def _clip_bounds_items_changed(self):
         self.volume_renderer.clip_bounds = self.clip_bounds[:]
 
