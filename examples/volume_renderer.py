@@ -80,7 +80,7 @@ def rescale_uint8(array):
 
 def show_volume(volume_data):
     app = QtApplication()
-    scene_members = [VolumeBoundingBox()]
+    scene_members = {'bbox': VolumeBoundingBox()}
     viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256,
                           scene_members=scene_members)
     win = VolumeViewerWindow(viewer=viewer)

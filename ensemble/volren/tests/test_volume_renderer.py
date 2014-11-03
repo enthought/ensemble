@@ -40,8 +40,11 @@ enamldef MainView(Container): view:
         volume = np.random.normal(size=(32, 32, 32))
         volume = (255*(volume-volume.min())/volume.ptp()).astype(np.uint8)
         volume_data = VolumeData(raw_data=volume)
-        scene_members = [VolumeAxes(visible_axis_scales=(True, True, True)),
-                         VolumeBoundingBox(), VolumeCutPlanes()]
+        volume_axes = VolumeAxes(visible_axis_scales=(True, True, True))
+        volume_bbox = VolumeBoundingBox()
+        volume_cut_planes = VolumeCutPlanes()
+        scene_members = {'axes': volume_axes, 'bbox': volume_bbox,
+                         'cut_planes': volume_cut_planes}
         self.viewer = VolumeViewer(volume_data=volume_data,
                                    scene_members=scene_members)
         self.view, _ = self.parse_and_create(enaml_source,

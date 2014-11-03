@@ -1,7 +1,8 @@
 import numpy as np
 
 from mayavi.core.ui.api import MlabSceneModel
-from traits.api import Bool, CInt, HasTraits, Instance, List, on_trait_change
+from traits.api import (Bool, CInt, Dict, HasTraits, Instance, List, Str,
+                        on_trait_change)
 from tvtk.api import tvtk
 
 from ensemble.ctf.api import CtfEditor, get_color
@@ -35,7 +36,7 @@ class VolumeViewer(HasTraits):
     flip_z = Bool(False)
 
     # Additional members of the scene
-    scene_members = List(Instance(ABCVolumeSceneMember))
+    scene_members = Dict(Str, Instance(ABCVolumeSceneMember))
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -99,7 +100,7 @@ class VolumeViewer(HasTraits):
 
         # Add the other members to the scene
         volume_actor = self.volume_renderer.actor
-        for member in self.scene_members:
+        for member in self.scene_members.values():
             member.add_actors_to_scene(self.model, volume_actor)
 
         self._setup_camera()
