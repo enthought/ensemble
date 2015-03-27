@@ -8,6 +8,6 @@ https://github.com/nucleic/enaml/archive/0.9.8.tar.gz#egg=enaml
 -e git+http://github.com/enthought/traits.git#egg=traits
 -e git+http://github.com/enthought/traitsui.git#egg=traitsui
 -e git+http://github.com/enthought/pyface.git#egg=pyface
--e git+http://github.com/enthought/enable.git@b324dfe#egg=enable
+-e git+http://github.com/enthought/enable.git@19de532#egg=enable
 -e git+http://github.com/enthought/mayavi.git#egg=mayavi
 -e git+http://github.com/enthought/traits-enaml.git#egg=traits-enaml
