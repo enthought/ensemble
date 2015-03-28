@@ -2,7 +2,6 @@
 --allow-unverified PIL
 coverage
 enaml
-traits-enaml
 git+http://github.com/enthought/traits-enaml.git#egg=traits-enaml
 git+http://github.com/enthought/mayavi.git#egg=mayavi
 git+http://github.com/enthought/pyface.git#egg=pyface
