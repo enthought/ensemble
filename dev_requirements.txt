@@ -4,6 +4,5 @@ coverage
 enaml
 traits-enaml
 git+http://github.com/enthought/mayavi.git#egg=mayavi
-git+http://github.com/enthought/traitsui.git#egg=traitsui
 git+http://github.com/enthought/pyface.git#egg=pyface
-git+http://github.com/enthought/traits.git#egg=traits
+git+http://github.com/enthought/enable.git#egg=enable
