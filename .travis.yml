@@ -9,12 +9,14 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install python-scipy
   - sudo apt-get install python-vtk python-qt4 python-qt4-dev python-sip python-qt4-gl libqt4-scripttools swig
+  - export ETS_TOOLKIT=qt4
 install:
-  - pip install cython
+  # Since we cannot control the order that the dev_requirements file will be installed, we have to use
+  # setuptools==9.1 to avoid issue https://github.com/enthought/enable/issues/179
+  - pip install setuptools==9.1
   - pip install coveralls
   - pip install -r dev_requirements.txt
   - python setup.py develop
-  - export ETS_TOOLKIT=qt4
 script:
   coverage run -m nose.core -v
 notifications:
