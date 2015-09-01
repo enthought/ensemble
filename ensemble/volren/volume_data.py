@@ -2,6 +2,7 @@ import numpy as np
 
 from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
+from tvtk.common import configure_input_data
 
 
 VolumeArray = Array(shape=(None, None, None))
@@ -43,10 +44,10 @@ def _resample_data(image_data):
     output_spacing = (spacing[0] * (dims[0] / 256.0),
                       spacing[1] * (dims[1] / 256.0),
                       spacing[2] * (dims[2] / 256.0))
-    reslicer = tvtk.ImageReslice(input=image_data,
-                                 interpolation_mode='cubic',
+    reslicer = tvtk.ImageReslice(interpolation_mode='cubic',
                                  output_extent=(0, 255, 0, 255, 0, 255),
                                  output_spacing=output_spacing)
+    configure_input_data(reslicer, image_data)
     reslicer.update()
     result = reslicer.output
     result.point_data.scalars.name = POINT_DATA_SCALARS_NAME
