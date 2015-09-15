@@ -52,16 +52,51 @@ enamldef MainView(MainWindow):
 
     def test_mouse_drag_alpha(self):
         editor = self.editor
-        self.press_move_release(editor, [(200, 50), (220, 50), (240, 50),
-                                         (260, 50), (280, 50), (300, 50)],
-                                window=editor.window)
-        editor.request_redraw()
+
+        # Grab the second opacity node and compute its screen position.
+        node = editor.function.opacity.node_at(1)
+        initial_center, initial_opacity = node.center, node.opacity
+        w, h = editor.width, editor.height
+        pos = (w * initial_center, h * initial_opacity)
+
+        initial_pos = (pos[0] + editor.padding_left,
+                       pos[1] + editor.padding_bottom)
+        middle_pos = (initial_pos[0] + 20, initial_pos[1])
+        final_pos = (initial_pos[0] + 40, initial_pos[1])
+
+        # Move the opacity node around.
+        with self.assertTraitChanges(node, 'center'), \
+             self.assertTraitChanges(node, 'opacity'):
+                self.press_move_release(editor,
+                                        [initial_pos, middle_pos, final_pos])
+
+        # Ask for a redraw to test re-drawing.
+        with self.event_loop():
+            editor.request_redraw()
 
     def test_mouse_drag_color(self):
         editor = self.editor
-        self.press_move_release(editor, [(100, 50), (120, 50), (140, 50),
-                                         (160, 50), (180, 50), (200, 50)],
-                                window=editor.window)
+
+        # Grab the second color node and compute its screen position.
+        node = editor.function.color.node_at(1)
+        print node
+        initial_center = node.center
+        w, h = editor.width, editor.height
+        pos = (w * initial_center, h // 2)
+
+        initial_pos = (pos[0] + editor.padding_left,
+                       pos[1] + editor.padding_bottom)
+        middle_pos = (initial_pos[0] + 20, initial_pos[1])
+        final_pos = (initial_pos[0] + 40, initial_pos[1])
+
+        # Move the color node around.
+        with self.assertTraitChanges(node, 'center'):
+            self.press_move_release(editor,
+                                    [initial_pos, middle_pos, final_pos])
+
+        # Ask for a redraw to test re-drawing.
+        with self.event_loop():
+            editor.request_redraw()
 
 if __name__ == '__main__':
     unittest.main()
