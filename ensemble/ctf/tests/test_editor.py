@@ -79,7 +79,6 @@ enamldef MainView(MainWindow):
 
         # Grab the second color node and compute its screen position.
         node = editor.function.color.node_at(1)
-        print node
         initial_center = node.center
         w, h = editor.width, editor.height
         pos = (w * initial_center, h // 2)
