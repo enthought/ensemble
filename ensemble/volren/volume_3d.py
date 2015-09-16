@@ -7,6 +7,7 @@ from mayavi.modules.volume import Volume
 from mayavi.tools.modules import DataModuleFactory, make_function
 from traits.api import Dict, Instance, Str
 from tvtk.api import tvtk
+from tvtk.common import configure_input
 
 
 class Volume3D(Volume):
@@ -73,7 +74,7 @@ class Volume3D(Volume):
         self._volume_mapper = new_vm
         self._ray_cast_functions = ray_cast_functions
 
-        new_vm.input = self.module_manager.source.outputs[0]
+        configure_input(new_vm, self.module_manager.source.outputs[0])
         self.volume.mapper = new_vm
         new_vm.on_trait_change(self.render)
 
