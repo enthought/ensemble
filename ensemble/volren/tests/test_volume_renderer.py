@@ -60,6 +60,19 @@ enamldef MainView(Container): view:
         self.viewer = None
         EnamlTestAssistant.tearDown(self)
 
+    def _example_volume_mask(self, volume_array):
+        """
+           Generates a sample mask given the raw volume data.
+        """
+        mask = np.zeros_like(volume_array)
+        depth, height, width = mask.shape
+        half = (depth/2, height/2, width/2)
+        quarter = (depth/4, height/4, width/4)
+        axis_slices = [slice(half[i]-quarter[i], half[i]+quarter[i])
+                       for i in range(3)]
+        mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
+        return mask
+
     def test_renderer_initialized(self):
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
@@ -73,6 +86,18 @@ enamldef MainView(Container): view:
 
         self.assertEqual(axes_count, 1)
         self.assertEqual(cutplane_count, 3)
+
+        # Test applying mask, Pull Request #44
+        # Mask is not set initially
+        volume_data = self.viewer.volume_data
+        points_without_mask = volume_data.render_data.number_of_points
+        self.assertGreater(points_without_mask, 0)
+        # Now apply mask
+        volume = volume_data.raw_data
+        mask_data = self._example_volume_mask(volume)
+        self.viewer.volume_data.mask_data = mask_data
+        points_with_mask = volume_data.render_data.number_of_points
+        self.assertGreater(points_without_mask, points_with_mask)
 
     def test_renderer_clipping_bounds(self):
         self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
