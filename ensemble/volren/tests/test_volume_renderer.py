@@ -77,12 +77,13 @@ enamldef MainView(Container): view:
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
         # Count various actor types in the scene.
-        # XXX: The actor class for `VolumeBoundingBox` is too generic to be
-        # counted.
         scene_model = self.viewer.model
         axes_count = count_types(AXES_ACTOR_CLASS, scene_model.renderer.actors)
         cutplane_count = count_types(CUT_PLANE_ACTOR_CLASS,
                                      scene_model.actor_list)
+
+        # Ensure bounding box is computed
+        self.assertEqual(self.viewer.scene_members['bbox'].number_of_points, 8)
 
         self.assertEqual(axes_count, 1)
         self.assertEqual(cutplane_count, 3)
