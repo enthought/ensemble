@@ -78,9 +78,19 @@ enamldef MainView(Container): view:
         self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
 
     def test_renderer_screenshot(self):
+        # With default resolution
         image_array = self.viewer.screenshot()
+        s1 = image_array.size
         self.assertTrue(image_array.ndim == 3)
         self.assertTrue(image_array.shape[-1] == 3)
+
+        # With higher resolution
+        magnification = 3
+        image_array = self.viewer.screenshot(magnification=magnification)
+        s2 = image_array.size
+        self.assertTrue(image_array.ndim == 3)
+        self.assertTrue(image_array.shape[-1] == 3)
+        self.assertEqual(s2 / s1, magnification * magnification)
 
 if __name__ == "__main__":
     unittest.main()
