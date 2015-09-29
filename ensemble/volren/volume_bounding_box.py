@@ -1,4 +1,4 @@
-from traits.api import Int
+from traits.api import Instance
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data
 
@@ -11,7 +11,7 @@ class VolumeBoundingBox(ABCVolumeSceneMember):
     """
 
     # The number of points should be 8 after the bounding box is computed
-    number_of_points = Int(0)
+    outline = Instance(tvtk.OutlineFilter)
 
     #--------------------------------------------------------------------------
     # ABCVolumeSceneMember interface
@@ -21,9 +21,9 @@ class VolumeBoundingBox(ABCVolumeSceneMember):
 
         # An outline of the bounds of the Volume actor's data
         outline = tvtk.OutlineFilter()
+        self.outline = outline
         configure_input_data(outline, volume_actor.mapper.input)
         outline.update()
-        self.number_of_points = outline.output.number_of_points
         outline_mapper = tvtk.PolyDataMapper()
         configure_input_data(outline_mapper, outline.output)
         outline_actor = tvtk.Actor(mapper=outline_mapper)
