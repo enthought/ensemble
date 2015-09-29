@@ -83,16 +83,20 @@ enamldef MainView(Container): view:
                                      scene_model.actor_list)
 
         # Ensure bounding box is computed
-        self.assertEqual(self.viewer.scene_members['bbox'].number_of_points, 8)
+        outline = self.viewer.scene_members['bbox'].outline
+        self.assertEqual(outline.output.number_of_points, 8)
 
         self.assertEqual(axes_count, 1)
         self.assertEqual(cutplane_count, 3)
 
-        # Test applying mask, Pull Request #44
+    def test_volume_data_masking(self):
+        # Test applying mask, Pull Request #44.
+
         # Mask is not set initially
         volume_data = self.viewer.volume_data
         points_without_mask = volume_data.render_data.number_of_points
         self.assertGreater(points_without_mask, 0)
+
         # Now apply mask
         volume = volume_data.raw_data
         mask_data = self._example_volume_mask(volume)
