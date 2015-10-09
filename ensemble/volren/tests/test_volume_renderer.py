@@ -60,19 +60,52 @@ enamldef MainView(Container): view:
         self.viewer = None
         EnamlTestAssistant.tearDown(self)
 
+    def _example_volume_mask(self, volume_array):
+        """
+           Generates a sample mask given the raw volume data.
+        """
+        mask = np.zeros_like(volume_array)
+        depth, height, width = mask.shape
+        half = (depth/2, height/2, width/2)
+        quarter = (depth/4, height/4, width/4)
+        axis_slices = [slice(half[i]-quarter[i], half[i]+quarter[i])
+                       for i in range(3)]
+        mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
+        return mask
+
     def test_renderer_initialized(self):
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
         # Count various actor types in the scene.
-        # XXX: The actor class for `VolumeBoundingBox` is too generic to be
-        # counted.
         scene_model = self.viewer.model
         axes_count = count_types(AXES_ACTOR_CLASS, scene_model.renderer.actors)
         cutplane_count = count_types(CUT_PLANE_ACTOR_CLASS,
                                      scene_model.actor_list)
 
+        # Ensure bounding box is computed
+        outline = self.viewer.scene_members['bbox'].outline
+        self.assertEqual(outline.output.number_of_points, 8)
+
         self.assertEqual(axes_count, 1)
         self.assertEqual(cutplane_count, 3)
+
+    def test_volume_data_masking(self):
+        # Test applying mask, Pull Request #44.
+
+        volume_data = self.viewer.volume_data
+        volume = volume_data.raw_data
+
+        # Mask is not set initially
+        points_without_mask = volume_data.render_data.number_of_points
+        # 256^3: that's because we are resampling the data before sending it
+        # to VTK, see `volume_data._resample_data`.
+        self.assertEqual(points_without_mask, 256 * 256 * 256)
+
+        # Now apply mask
+        mask_data = self._example_volume_mask(volume)
+        self.viewer.volume_data.mask_data = mask_data
+        points_with_mask = volume_data.render_data.number_of_points
+        self.assertEqual(points_with_mask, mask_data.size)
 
     def test_renderer_clipping_bounds(self):
         self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
