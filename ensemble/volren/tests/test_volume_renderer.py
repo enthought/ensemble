@@ -92,17 +92,20 @@ enamldef MainView(Container): view:
     def test_volume_data_masking(self):
         # Test applying mask, Pull Request #44.
 
-        # Mask is not set initially
         volume_data = self.viewer.volume_data
+        volume = volume_data.raw_data
+
+        # Mask is not set initially
         points_without_mask = volume_data.render_data.number_of_points
-        self.assertGreater(points_without_mask, 0)
+        # 256^3: that's because we are resampling the data before sending it
+        # to VTK, see `volume_data._resample_data`.
+        self.assertEqual(points_without_mask, 256 * 256 * 256)
 
         # Now apply mask
-        volume = volume_data.raw_data
         mask_data = self._example_volume_mask(volume)
         self.viewer.volume_data.mask_data = mask_data
         points_with_mask = volume_data.render_data.number_of_points
-        self.assertGreater(points_without_mask, points_with_mask)
+        self.assertEqual(points_with_mask, mask_data.size)
 
     def test_renderer_clipping_bounds(self):
         self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
