@@ -4,6 +4,7 @@ from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data, is_old_pipeline
 
+from .volume_data_filter import VolumeFilter
 
 VolumeArray = Array(shape=(None, None, None))
 
@@ -75,6 +76,10 @@ class VolumeData(HasStrictTraits):
     # The data as a fortran array
     _raw_data = VolumeArray
 
+    # The filter to apply to the raw data
+    volume_filter = Property(Instance(VolumeFilter))
+    _volume_filter = Instance(VolumeFilter)
+
     # The bounds of the volume
     bounds = Tuple(Float, Float, Float)
 
@@ -122,6 +127,10 @@ class VolumeData(HasStrictTraits):
     def _set_raw_data(self, value):
         self._render_data = None
         self._raw_data = np.asfortranarray(value)
+
+    def _set_volume_filter(self, value):
+        self._volume_filter = value
+        self.raw_data = self._volume_filter.filter(self.raw_data)
 
     # -------------------------------------------------------------------------
     # Private methods
