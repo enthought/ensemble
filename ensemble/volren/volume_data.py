@@ -128,7 +128,11 @@ class VolumeData(HasStrictTraits):
         self._render_data = None
         self._raw_data = np.asfortranarray(value)
 
+    def _get_volume_filter(self):
+        return self._volume_filter
+
     def _set_volume_filter(self, value):
+        self._render_data = None
         self._volume_filter = value
         self.raw_data = self._volume_filter.filter(self.raw_data)
 

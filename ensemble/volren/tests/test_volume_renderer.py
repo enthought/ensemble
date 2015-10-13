@@ -9,6 +9,7 @@ from ensemble.volren.volume_axes import VolumeAxes
 from ensemble.volren.volume_bounding_box import VolumeBoundingBox
 from ensemble.volren.volume_cut_planes import VolumeCutPlanes
 from ensemble.volren.volume_data import VolumeData
+from ensemble.volren.volume_data_filter import VolumeFilter
 from ensemble.volren.volume_viewer import VolumeViewer, CLIP_MAX
 
 
@@ -73,6 +74,18 @@ enamldef MainView(Container): view:
         mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
         return mask
 
+    def _get_sample_filter(self):
+        """
+            Returns an instance of a sample filter
+        """
+        class SampleFilter(VolumeFilter):
+            name = "Sample"
+
+            def filter(self, raw_data):
+                return np.rot90(raw_data, 2)
+
+        return SampleFilter()
+
     def test_renderer_initialized(self):
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
@@ -106,6 +119,24 @@ enamldef MainView(Container): view:
         self.viewer.volume_data.mask_data = mask_data
         points_with_mask = volume_data.render_data.number_of_points
         self.assertEqual(points_with_mask, mask_data.size)
+
+    def test_volume_data_filtering(self):
+        # Test apply filter on raw data, Pull Request #48
+
+        volume_data = self.viewer.volume_data
+
+        # Filter is not set initially
+        initial_points = volume_data.render_data.number_of_points
+        self.assertIsNone(volume_data.volume_filter)
+        # 256^3: that's because we are filtering the data before sending it
+        # to VTK, see `volume_data._resample_data`.
+        self.assertEqual(initial_points, 256 * 256 * 256)
+
+        # Now apply the filter
+        sample_filter = self._get_sample_filter()
+        self.viewer.volume_data.volume_filter = sample_filter
+        filtered_points = volume_data.render_data.number_of_points
+        self.assertEqual(initial_points, filtered_points)
 
     def test_renderer_clipping_bounds(self):
         self.assertEqual(self.viewer.volume_renderer.clip_bounds, CLIP_BOUNDS)
