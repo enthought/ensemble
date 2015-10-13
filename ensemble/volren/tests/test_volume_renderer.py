@@ -21,6 +21,14 @@ CLIP_BOUNDS = [0, CLIP_MAX/2, 0, CLIP_MAX/2, 0, CLIP_MAX/2]
 def count_types(type_class, obj_list):
     return sum(int(isinstance(obj, type_class)) for obj in obj_list)
 
+class SampleFilter(VolumeFilter):
+    """
+        A sample filter to transform the volume raw data.
+    """
+    name = 'Sample'
+
+    def filter(self, raw_data):
+        return np.rot90(raw_data, 2)
 
 class VolumeViewerTestCase(EnamlTestAssistant, unittest.TestCase):
 
@@ -74,18 +82,6 @@ enamldef MainView(Container): view:
         mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255
         return mask
 
-    def _get_sample_filter(self):
-        """
-            Returns an instance of a sample filter
-        """
-        class SampleFilter(VolumeFilter):
-            name = "Sample"
-
-            def filter(self, raw_data):
-                return np.rot90(raw_data, 2)
-
-        return SampleFilter()
-
     def test_renderer_initialized(self):
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
 
@@ -133,8 +129,7 @@ enamldef MainView(Container): view:
         self.assertEqual(initial_points, 256 * 256 * 256)
 
         # Now apply the filter
-        sample_filter = self._get_sample_filter()
-        self.viewer.volume_data.volume_filter = sample_filter
+        self.viewer.volume_data.volume_filter = SampleFilter()
         filtered_points = volume_data.render_data.number_of_points
         self.assertEqual(initial_points, filtered_points)
 
