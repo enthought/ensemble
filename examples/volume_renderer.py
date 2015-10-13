@@ -19,11 +19,11 @@ import numpy as np
 from enaml.qt.qt_application import QtApplication
 import traits_enaml
 
-from ensemble.volren.api import VolumeBoundingBox, VolumeData, VolumeViewer
+from ensemble.volren.api import (VolumeBoundingBox, VolumeData, VolumeViewer,
+                                 VolumeFilter)
 
 with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
-
 
 def build_volume_data(cmdline_args):
     if cmdline_args.volume_file is None:
@@ -35,11 +35,24 @@ def build_volume_data(cmdline_args):
             volume = h5.getNode(cmdline_args.node)[:].T
 
     volume_data_kwargs = {'raw_data': volume}
+
+    if cmdline_args.filter:
+        sample_filter = example_sample_filter()
+        volume_data_kwargs['volume_filter'] = sample_filter
+
     if cmdline_args.mask:
         volume_data_kwargs['mask_data'] = example_volume_mask(volume)
 
     return VolumeData(**volume_data_kwargs)
 
+def example_sample_filter():
+    class SampleFilter(VolumeFilter):
+        name = 'Sample'
+
+        def filter(self, raw_data):
+            return np.rot90(raw_data)
+
+    return SampleFilter()
 
 def example_volume_mask(volume_array):
     mask = np.zeros_like(volume_array)
@@ -93,6 +106,8 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-m', '--mask', action='store_true',
                         help='Whether or not the data should be masked.')
+    parser.add_argument('-f', '--filter', action='store_true',
+                        help='Whether or not the data should be filtered')
     parser.add_argument('-n', '--node', default='/ct',
                         help='The path to the node in the HDF5 file '
                              'containing the volume data.')
