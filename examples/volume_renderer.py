@@ -25,6 +25,14 @@ from ensemble.volren.api import (VolumeBoundingBox, VolumeData, VolumeViewer,
 with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
 
+class SampleFilter(VolumeFilter):
+    """
+        A sample filter to transform the volume raw data.
+    """
+
+    def filter(self, raw_data):
+        return np.rot90(raw_data)
+
 def build_volume_data(cmdline_args):
     if cmdline_args.volume_file is None:
         volume = example_volume()
@@ -37,8 +45,7 @@ def build_volume_data(cmdline_args):
     volume_data_kwargs = {'raw_data': volume}
 
     if cmdline_args.filter:
-        sample_filter = example_sample_filter()
-        volume_data_kwargs['volume_filter'] = sample_filter
+        volume_data_kwargs['volume_filter'] = SampleFilter(name='Sample')
 
     if cmdline_args.mask:
         volume_data_kwargs['mask_data'] = example_volume_mask(volume)
@@ -46,12 +53,6 @@ def build_volume_data(cmdline_args):
     return VolumeData(**volume_data_kwargs)
 
 def example_sample_filter():
-    class SampleFilter(VolumeFilter):
-        name = 'Sample'
-
-        def filter(self, raw_data):
-            return np.rot90(raw_data)
-
     return SampleFilter()
 
 def example_volume_mask(volume_array):

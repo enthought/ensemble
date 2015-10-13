@@ -9,7 +9,7 @@ from ensemble.volren.volume_axes import VolumeAxes
 from ensemble.volren.volume_bounding_box import VolumeBoundingBox
 from ensemble.volren.volume_cut_planes import VolumeCutPlanes
 from ensemble.volren.volume_data import VolumeData
-from ensemble.volren.volume_data_filter import VolumeFilter
+from ensemble.volren.volume_filter import VolumeFilter
 from ensemble.volren.volume_viewer import VolumeViewer, CLIP_MAX
 
 
@@ -25,7 +25,6 @@ class SampleFilter(VolumeFilter):
     """
         A sample filter to transform the volume raw data.
     """
-    name = 'Sample'
 
     def filter(self, raw_data):
         return np.rot90(raw_data, 2)
@@ -129,7 +128,7 @@ enamldef MainView(Container): view:
         self.assertEqual(initial_points, 256 * 256 * 256)
 
         # Now apply the filter
-        self.viewer.volume_data.volume_filter = SampleFilter()
+        self.viewer.volume_data.volume_filter = SampleFilter(name='Sample')
         filtered_points = volume_data.render_data.number_of_points
         self.assertEqual(initial_points, filtered_points)
 

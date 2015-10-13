@@ -4,7 +4,7 @@ from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data, is_old_pipeline
 
-from .volume_data_filter import VolumeFilter
+from .volume_filter import VolumeFilter
 
 VolumeArray = Array(shape=(None, None, None))
 

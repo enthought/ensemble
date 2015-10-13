@@ -1,8 +1,10 @@
-class VolumeFilter():
+from traits.api import HasStrictTraits, Str
+
+class VolumeFilter(HasStrictTraits):
     """ This is the default volume data filter. 
         Subclass this filter to transform the volume data.
     """
-    name = 'Default'
+    name = Str
 
     def filter(self, raw_data):
         """ Transform the volume data raw_data.
