@@ -26,6 +26,9 @@ class VolumeAxes(ABCVolumeSceneMember):
     # Axes units.
     axis_units = Tuple(Str, Str, Str)
 
+    # Axes labels format.
+    axis_label_formats = Tuple(Str, Str, Str)
+
     # Fly mode, determining the position of the axes on the bounding box.
     fly_mode = Enum(('static_triad', 'closest_triad', 'furthest_triad',
                      'outer_edges', 'static_edges'))
@@ -43,6 +46,7 @@ class VolumeAxes(ABCVolumeSceneMember):
             x_range, y_range, z_range = self.visible_axis_ranges
             x_title, y_title, z_title = self.axis_titles
             x_units, y_units, z_units = self.axis_units
+            x_format, y_format, z_format = self.axis_label_formats
             cube_axes = tvtk.CubeAxesActor(
                 bounds=bounds,
                 camera=scene_model.camera,
@@ -60,6 +64,9 @@ class VolumeAxes(ABCVolumeSceneMember):
                 y_axis_minor_tick_visibility=self.show_axis_minor_ticks,
                 z_axis_minor_tick_visibility=self.show_axis_minor_ticks,
                 fly_mode=self.fly_mode,
+                x_label_format=x_format,
+                y_label_format=y_format,
+                z_label_format=z_format,
             )
             scene_model.renderer.add_actor(cube_axes)
 
@@ -72,3 +79,6 @@ class VolumeAxes(ABCVolumeSceneMember):
 
     def _visible_axis_scales_default(self):
         return (False, False, False)
+
+    def _axis_label_formats_default(self):
+        return ('%6.3g', '%6.3g', '%6.3g')
