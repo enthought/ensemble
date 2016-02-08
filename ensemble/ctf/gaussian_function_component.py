@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import gaussian
+from scipy.signal import hamming
 
 from traits.api import Callable, Enum, Instance, on_trait_change
 
@@ -18,7 +18,7 @@ GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MIN_GAUSSIAN_STD = 2.0
 GAUSSIAN_RADIUS_STD_SCALE = 50.0
-MAX_GAUSSIAN_NUM_SAMPLES = 256
+MAX_NUM_SAMPLES = 256
 GAUSSIAN_MINIMUM_RADIUS = 0.03
 
 
@@ -42,11 +42,10 @@ class GaussianOpacityNode(OpacityNode):
     """
     def values(self):
         center, radius = self.center, self.radius
-        std = max(MIN_GAUSSIAN_STD, radius * GAUSSIAN_RADIUS_STD_SCALE)
-        num_samples = int(np.round(radius * 2.0 * MAX_GAUSSIAN_NUM_SAMPLES))
+        num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = gaussian(num_samples, std=std) * self.opacity
+        ys = hamming(num_samples) * self.opacity
         return zip(xs, ys)
 
 
