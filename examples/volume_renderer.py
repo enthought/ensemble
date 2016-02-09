@@ -20,6 +20,8 @@ from enaml.qt.qt_application import QtApplication
 import traits_enaml
 
 from ensemble.volren.api import VolumeBoundingBox, VolumeData, VolumeViewer
+from ensemble.volren.volume_axes import VolumeAxes
+
 
 with traits_enaml.imports():
     from volume_viewer_window import VolumeViewerWindow
@@ -80,7 +82,16 @@ def rescale_uint8(array):
 
 def show_volume(volume_data):
     app = QtApplication()
-    scene_members = {'bbox': VolumeBoundingBox()}
+
+    volume_axes = VolumeAxes(
+        visible_axis_scales=(True, True, True),
+        axis_titles=('X', 'Y', 'Z'),
+        axis_units=('m', 'ft', 'km'),
+    )
+    scene_members = {
+        'bbox': VolumeBoundingBox(),
+        'axes': volume_axes,
+    }
     viewer = VolumeViewer(volume_data=volume_data, histogram_bins=256,
                           scene_members=scene_members)
     win = VolumeViewerWindow(viewer=viewer)

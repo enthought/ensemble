@@ -45,15 +45,21 @@ class VolumeViewer(HasTraits):
     # Public interface
     # -------------------------------------------------------------------------
 
-    def screenshot(self):
+    def screenshot(self, magnification=1):
         """ Returns an image of the rendered volume. The image will be the same
-        size as the window on screen.
+        size as the window on screen by default. For high resolution image,
+        pass a magnification integer value > 1.
         """
-        render_window = self.model.render_window
-        x, y = render_window.size
+        renderer = self.model.renderer
 
-        data = tvtk.UnsignedCharArray()
-        render_window.get_pixel_data(0, 0, x - 1, y - 1, 1, data)
+        image_filter = tvtk.RenderLargeImage()
+        image_filter.input = renderer
+        image_filter.magnification = magnification
+        image_filter.update()
+
+        image_data = image_filter.output
+        x, y, _ = image_data.dimensions
+        data = image_data.point_data.scalars
         data_array = data.to_array().copy()
         data_array.shape = (y, x, 3)
         data_array = np.flipud(data_array)

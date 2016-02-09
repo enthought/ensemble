@@ -2,6 +2,7 @@ import numpy as np
 
 from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
 from tvtk.api import tvtk
+from tvtk.common import configure_input_data, is_old_pipeline
 
 
 VolumeArray = Array(shape=(None, None, None))
@@ -15,8 +16,12 @@ def _apply_mask(volume_data, mask_data):
     """
     mask_image_data = _image_data_from_array(mask_data, volume_data.spacing)
     masker = tvtk.ImageMask()
-    masker.set_image_input(volume_data)
-    masker.set_mask_input(mask_image_data)
+    if is_old_pipeline():
+        masker.set_image_input(volume_data)
+        masker.set_mask_input(mask_image_data)
+    else:
+        masker.set_image_input_data(volume_data)
+        masker.set_mask_input_data(mask_image_data)
     masker.update()
     result = masker.output
     result.point_data.scalars.name = POINT_DATA_SCALARS_NAME
@@ -43,10 +48,10 @@ def _resample_data(image_data):
     output_spacing = (spacing[0] * (dims[0] / 256.0),
                       spacing[1] * (dims[1] / 256.0),
                       spacing[2] * (dims[2] / 256.0))
-    reslicer = tvtk.ImageReslice(input=image_data,
-                                 interpolation_mode='cubic',
+    reslicer = tvtk.ImageReslice(interpolation_mode='cubic',
                                  output_extent=(0, 255, 0, 255, 0, 255),
                                  output_spacing=output_spacing)
+    configure_input_data(reslicer, image_data)
     reslicer.update()
     result = reslicer.output
     result.point_data.scalars.name = POINT_DATA_SCALARS_NAME
