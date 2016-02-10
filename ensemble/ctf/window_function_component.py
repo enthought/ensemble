@@ -17,7 +17,7 @@ BLACK = (0.0, 0.0, 0.0, 1.0)
 GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MAX_NUM_SAMPLES = 256
-GAUSSIAN_MINIMUM_RADIUS = 0.03
+MINIMUM_RADIUS = 0.005
 
 
 def _get_node(nodes, node_class):
@@ -225,7 +225,7 @@ class GaussianComponent(BaseColorComponent):
         min_center, max_center = self._center_limits
         center = node.center
         radius_limit = min(center - min_center, max_center - center)
-        node.radius = max(min(rel_rad, radius_limit), GAUSSIAN_MINIMUM_RADIUS)
+        node.radius = max(min(rel_rad, radius_limit), MINIMUM_RADIUS)
 
 
 # Register our function node
