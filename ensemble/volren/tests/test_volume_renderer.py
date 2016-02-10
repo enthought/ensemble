@@ -125,5 +125,19 @@ enamldef MainView(Container): view:
         self.assertTrue(image_array.shape[-1] == 3)
         self.assertEqual(s2 / s1, magnification * magnification)
 
+    def test_data_update(self):
+        # Changing the raw data should update the `vmin` and `vmax` values
+        new_volume = 42 * np.ones_like(self.viewer.volume_data.raw_data)
+        new_min = 10
+        new_max = 100
+        new_volume[0, 0, 0] = new_min
+        new_volume[-1, -1, -1] = new_max
+
+        self.viewer.volume_renderer.data.raw_data = new_volume
+
+        self.assertEqual(self.viewer.volume_renderer.vmin, new_min)
+        self.assertEqual(self.viewer.volume_renderer.vmax, new_max)
+
+
 if __name__ == "__main__":
     unittest.main()

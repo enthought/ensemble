@@ -114,12 +114,13 @@ class VolumeRenderer(HasStrictTraits):
     def _clip_bounds_default(self):
         return [0, CLIP_MAX, 0, CLIP_MAX, 0, CLIP_MAX]
 
-    def _data_changed(self):
+    @on_trait_change('data.raw_data')
+    def _update_data(self):
         self.vmin = self.data.raw_data.min()
         self.vmax = self.data.raw_data.max()
         self._render_data_changed()
 
-    @on_trait_change('data:raw_data,data:mask_data')
+    @on_trait_change('data:mask_data')
     def _render_data_changed(self):
         if self.data_source is not None:
             image_data = self.data.render_data
