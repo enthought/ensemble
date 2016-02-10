@@ -36,7 +36,7 @@ class WindowColorNode(ColorNode):
 
 
 class WindowOpacityNode(OpacityNode):
-    """ An `OpacityNode` with a non-zero radius and a Gaussian shape.
+    """ An `OpacityNode` with a non-zero radius and a Hamming shape.
     """
     def values(self):
         center, radius = self.center, self.radius
@@ -87,7 +87,7 @@ class WindowHeightWidget(MovableComponent):
 
 class WindowComponent(BaseColorComponent):
     """ A `BaseColorComponent` which has some radius and both color and
-    opacity, with the opacity determined by a Gaussian.
+    opacity, with the opacity determined by a Hamming function.
     """
 
     # The opacity node
@@ -129,7 +129,7 @@ class WindowComponent(BaseColorComponent):
         color_node = _get_node(nodes, WindowColorNode)
         opacity_node = _get_node(nodes, WindowOpacityNode)
         if len(nodes) != 2 and (color_node is None or opacity_node is None):
-            raise ValueError('Expecting two Gaussian function nodes!')
+            raise ValueError('Expecting two Hamming function nodes!')
 
         return cls(node=color_node, opacity_node=opacity_node)
 
