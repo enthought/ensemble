@@ -7,7 +7,7 @@ from traits.api import Callable, Either, Instance, Tuple, on_trait_change
 from .color_function_component import ColorNode, ColorComponent
 from .function_component import FunctionComponent
 from .window_function_component import (
-    GaussianComponent, GaussianColorNode, GaussianOpacityNode,
+    GaussianComponent, WindowColorNode, GaussianOpacityNode,
     MINIMUM_RADIUS
 )
 from .menu_tool import menu_tool_with_actions
@@ -56,7 +56,7 @@ class AddGaussianAction(BaseColorAction):
         rel_x, rel_y = self.screen_to_function(screen_position)
         rad = MINIMUM_RADIUS
 
-        color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
+        color_node = WindowColorNode(center=rel_x, color=color, radius=rad)
         opacity_node = GaussianOpacityNode(center=rel_x, opacity=rel_y,
                                            radius=rad)
         component = GaussianComponent(node=color_node,

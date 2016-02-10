@@ -27,7 +27,7 @@ def _get_node(nodes, node_class):
     return None
 
 
-class GaussianColorNode(ColorNode):
+class WindowColorNode(ColorNode):
     """ A `ColorNode` representing a single color with a radius.
     """
     def values(self):
@@ -126,7 +126,7 @@ class GaussianComponent(BaseColorComponent):
     def from_function_nodes(cls, *nodes):
         """ Create an instance from `nodes`.
         """
-        color_node = _get_node(nodes, GaussianColorNode)
+        color_node = _get_node(nodes, WindowColorNode)
         opacity_node = _get_node(nodes, GaussianOpacityNode)
         if len(nodes) != 2 and (color_node is None or opacity_node is None):
             raise ValueError('Expecting two Gaussian function nodes!')
@@ -229,8 +229,8 @@ class GaussianComponent(BaseColorComponent):
 
 
 # Register our function node
-register_function_node_class(GaussianColorNode)
+register_function_node_class(WindowColorNode)
 register_function_node_class(GaussianOpacityNode)
 # ... and our function component
-register_function_component_class(GaussianColorNode, GaussianComponent)
+register_function_component_class(WindowColorNode, GaussianComponent)
 register_function_component_class(GaussianOpacityNode, GaussianComponent)
