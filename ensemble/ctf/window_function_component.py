@@ -47,7 +47,7 @@ class WindowOpacityNode(OpacityNode):
         return zip(xs, ys)
 
 
-class GaussianHeightWidget(MovableComponent):
+class WindowHeightWidget(MovableComponent):
     """ A widget for setting the `opacity` of a `WindowOpacityNode`.
     """
 
@@ -94,7 +94,7 @@ class GaussianComponent(BaseColorComponent):
     opacity_node = Instance(WindowOpacityNode)
 
     # The widget for setting the opacity peak
-    opacity_widget = Instance(GaussianHeightWidget)
+    opacity_widget = Instance(WindowHeightWidget)
 
     # Are we being moved or resized?
     interaction_state = Enum('move', 'resize')
@@ -102,7 +102,7 @@ class GaussianComponent(BaseColorComponent):
     def __init__(self, **traits):
         super(GaussianComponent, self).__init__(**traits)
 
-        self.opacity_widget = GaussianHeightWidget(
+        self.opacity_widget = WindowHeightWidget(
             node=self.opacity_node,
             screen_to_relative=self.screen_to_relative,
             relative_to_screen=self.relative_to_screen,
