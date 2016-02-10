@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import hamming
+from scipy.signal import hanning
 
 from traits.api import Callable, Enum, Instance, on_trait_change
 
@@ -43,7 +43,7 @@ class WindowOpacityNode(OpacityNode):
         num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = hamming(num_samples) * self.opacity
+        ys = hanning(num_samples) * self.opacity
         return zip(xs, ys)
 
 
