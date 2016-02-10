@@ -85,7 +85,7 @@ class WindowHeightWidget(MovableComponent):
             self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2.0)
 
 
-class GaussianComponent(BaseColorComponent):
+class WindowComponent(BaseColorComponent):
     """ A `BaseColorComponent` which has some radius and both color and
     opacity, with the opacity determined by a Gaussian.
     """
@@ -100,7 +100,7 @@ class GaussianComponent(BaseColorComponent):
     interaction_state = Enum('move', 'resize')
 
     def __init__(self, **traits):
-        super(GaussianComponent, self).__init__(**traits)
+        super(WindowComponent, self).__init__(**traits)
 
         self.opacity_widget = WindowHeightWidget(
             node=self.opacity_node,
@@ -232,5 +232,5 @@ class GaussianComponent(BaseColorComponent):
 register_function_node_class(WindowColorNode)
 register_function_node_class(WindowOpacityNode)
 # ... and our function component
-register_function_component_class(WindowColorNode, GaussianComponent)
-register_function_component_class(WindowOpacityNode, GaussianComponent)
+register_function_component_class(WindowColorNode, WindowComponent)
+register_function_component_class(WindowOpacityNode, WindowComponent)
