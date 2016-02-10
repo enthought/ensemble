@@ -6,9 +6,9 @@ from traits.api import Callable, Either, Instance, Tuple, on_trait_change
 
 from .color_function_component import ColorNode, ColorComponent
 from .function_component import FunctionComponent
-from .gaussian_function_component import (
-    GaussianComponent, GaussianColorNode, GaussianOpacityNode,
-    GAUSSIAN_MINIMUM_RADIUS
+from .window_function_component import (
+    WindowComponent, WindowColorNode, WindowOpacityNode,
+    MINIMUM_RADIUS
 )
 from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
@@ -48,19 +48,19 @@ class AddColorAction(BaseColorAction):
         self.container.add_function_component(component)
 
 
-class AddGaussianAction(BaseColorAction):
-    name = 'Add Gaussian...'
+class AddWindowAction(BaseColorAction):
+    name = 'Add Color/Opacity Window...'
 
     def perform_with_color(self, event, color):
         screen_position = (event.enable_event.x, event.enable_event.y)
         rel_x, rel_y = self.screen_to_function(screen_position)
-        rad = GAUSSIAN_MINIMUM_RADIUS
+        rad = MINIMUM_RADIUS
 
-        color_node = GaussianColorNode(center=rel_x, color=color, radius=rad)
-        opacity_node = GaussianOpacityNode(center=rel_x, opacity=rel_y,
-                                           radius=rad)
-        component = GaussianComponent(node=color_node,
-                                      opacity_node=opacity_node)
+        color_node = WindowColorNode(center=rel_x, color=color, radius=rad)
+        opacity_node = WindowOpacityNode(center=rel_x, opacity=rel_y,
+                                         radius=rad)
+        component = WindowComponent(node=color_node,
+                                    opacity_node=opacity_node)
         self.container.add_function_component(component)
 
 
@@ -133,7 +133,7 @@ class CtfEditor(Container):
         prompt_color = self.prompt_color_selection
         actions = [
             AddColorAction(container=self, prompt_color=prompt_color),
-            AddGaussianAction(container=self, prompt_color=prompt_color),
+            AddWindowAction(container=self, prompt_color=prompt_color),
             AddOpacityAction(container=self),
         ]
         return [menu_tool_with_actions(self, actions)]

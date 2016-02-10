@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import gaussian
+from scipy.signal import hanning
 
 from traits.api import Callable, Enum, Instance, on_trait_change
 
@@ -16,10 +16,8 @@ RESIZE_THRESHOLD = 7.0
 BLACK = (0.0, 0.0, 0.0, 1.0)
 GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
-MIN_GAUSSIAN_STD = 2.0
-GAUSSIAN_RADIUS_STD_SCALE = 50.0
-MAX_GAUSSIAN_NUM_SAMPLES = 256
-GAUSSIAN_MINIMUM_RADIUS = 0.03
+MAX_NUM_SAMPLES = 256
+MINIMUM_RADIUS = 0.005
 
 
 def _get_node(nodes, node_class):
@@ -29,7 +27,7 @@ def _get_node(nodes, node_class):
     return None
 
 
-class GaussianColorNode(ColorNode):
+class WindowColorNode(ColorNode):
     """ A `ColorNode` representing a single color with a radius.
     """
     def values(self):
@@ -37,26 +35,25 @@ class GaussianColorNode(ColorNode):
         return [(start_x,) + self.color, (end_x,) + self.color]
 
 
-class GaussianOpacityNode(OpacityNode):
-    """ An `OpacityNode` with a non-zero radius and a Gaussian shape.
+class WindowOpacityNode(OpacityNode):
+    """ An `OpacityNode` with a non-zero radius and a Hanning shape.
     """
     def values(self):
         center, radius = self.center, self.radius
-        std = max(MIN_GAUSSIAN_STD, radius * GAUSSIAN_RADIUS_STD_SCALE)
-        num_samples = int(np.round(radius * 2.0 * MAX_GAUSSIAN_NUM_SAMPLES))
+        num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = gaussian(num_samples, std=std) * self.opacity
+        ys = hanning(num_samples) * self.opacity
         return zip(xs, ys)
 
 
-class GaussianHeightWidget(MovableComponent):
-    """ A widget for setting the `opacity` of a `GaussianOpacityNode`.
+class WindowHeightWidget(MovableComponent):
+    """ A widget for setting the `opacity` of a `WindowOpacityNode`.
     """
 
     hover_pointer = "size top"
 
-    node = Instance(GaussianOpacityNode)
+    node = Instance(WindowOpacityNode)
 
     screen_to_relative = Callable
     relative_to_screen = Callable
@@ -88,24 +85,24 @@ class GaussianHeightWidget(MovableComponent):
             self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2.0)
 
 
-class GaussianComponent(BaseColorComponent):
+class WindowComponent(BaseColorComponent):
     """ A `BaseColorComponent` which has some radius and both color and
-    opacity, with the opacity determined by a Gaussian.
+    opacity, with the opacity determined by a Hanning function.
     """
 
     # The opacity node
-    opacity_node = Instance(GaussianOpacityNode)
+    opacity_node = Instance(WindowOpacityNode)
 
     # The widget for setting the opacity peak
-    opacity_widget = Instance(GaussianHeightWidget)
+    opacity_widget = Instance(WindowHeightWidget)
 
     # Are we being moved or resized?
     interaction_state = Enum('move', 'resize')
 
     def __init__(self, **traits):
-        super(GaussianComponent, self).__init__(**traits)
+        super(WindowComponent, self).__init__(**traits)
 
-        self.opacity_widget = GaussianHeightWidget(
+        self.opacity_widget = WindowHeightWidget(
             node=self.opacity_node,
             screen_to_relative=self.screen_to_relative,
             relative_to_screen=self.relative_to_screen,
@@ -129,10 +126,10 @@ class GaussianComponent(BaseColorComponent):
     def from_function_nodes(cls, *nodes):
         """ Create an instance from `nodes`.
         """
-        color_node = _get_node(nodes, GaussianColorNode)
-        opacity_node = _get_node(nodes, GaussianOpacityNode)
+        color_node = _get_node(nodes, WindowColorNode)
+        opacity_node = _get_node(nodes, WindowOpacityNode)
         if len(nodes) != 2 and (color_node is None or opacity_node is None):
-            raise ValueError('Expecting two Gaussian function nodes!')
+            raise ValueError('Expecting two Hanning function nodes!')
 
         return cls(node=color_node, opacity_node=opacity_node)
 
@@ -228,12 +225,12 @@ class GaussianComponent(BaseColorComponent):
         min_center, max_center = self._center_limits
         center = node.center
         radius_limit = min(center - min_center, max_center - center)
-        node.radius = max(min(rel_rad, radius_limit), GAUSSIAN_MINIMUM_RADIUS)
+        node.radius = max(min(rel_rad, radius_limit), MINIMUM_RADIUS)
 
 
 # Register our function node
-register_function_node_class(GaussianColorNode)
-register_function_node_class(GaussianOpacityNode)
+register_function_node_class(WindowColorNode)
+register_function_node_class(WindowOpacityNode)
 # ... and our function component
-register_function_component_class(GaussianColorNode, GaussianComponent)
-register_function_component_class(GaussianOpacityNode, GaussianComponent)
+register_function_component_class(WindowColorNode, WindowComponent)
+register_function_component_class(WindowOpacityNode, WindowComponent)

@@ -3,8 +3,8 @@ from .color_function_component import ColorComponent  # noqa
 from .editor import CtfEditor  # noqa
 from .function_component import FunctionComponent  # noqa
 from .function_node import FunctionNode  # noqa
-from .gaussian_function_component import (  # noqa
-    GaussianColorNode, GaussianOpacityNode, GaussianComponent
+from .window_function_component import (  # noqa
+    WindowColorNode, WindowOpacityNode, WindowComponent
 )
 from .gui_utils import get_color  # noqa
 from .manager import CtfManager  # noqa
