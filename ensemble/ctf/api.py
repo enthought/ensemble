@@ -4,7 +4,7 @@ from .editor import CtfEditor  # noqa
 from .function_component import FunctionComponent  # noqa
 from .function_node import FunctionNode  # noqa
 from .window_function_component import (  # noqa
-    WindowColorNode, GaussianOpacityNode, GaussianComponent
+    WindowColorNode, WindowOpacityNode, GaussianComponent
 )
 from .gui_utils import get_color  # noqa
 from .manager import CtfManager  # noqa

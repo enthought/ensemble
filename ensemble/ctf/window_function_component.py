@@ -35,7 +35,7 @@ class WindowColorNode(ColorNode):
         return [(start_x,) + self.color, (end_x,) + self.color]
 
 
-class GaussianOpacityNode(OpacityNode):
+class WindowOpacityNode(OpacityNode):
     """ An `OpacityNode` with a non-zero radius and a Gaussian shape.
     """
     def values(self):
@@ -48,12 +48,12 @@ class GaussianOpacityNode(OpacityNode):
 
 
 class GaussianHeightWidget(MovableComponent):
-    """ A widget for setting the `opacity` of a `GaussianOpacityNode`.
+    """ A widget for setting the `opacity` of a `WindowOpacityNode`.
     """
 
     hover_pointer = "size top"
 
-    node = Instance(GaussianOpacityNode)
+    node = Instance(WindowOpacityNode)
 
     screen_to_relative = Callable
     relative_to_screen = Callable
@@ -91,7 +91,7 @@ class GaussianComponent(BaseColorComponent):
     """
 
     # The opacity node
-    opacity_node = Instance(GaussianOpacityNode)
+    opacity_node = Instance(WindowOpacityNode)
 
     # The widget for setting the opacity peak
     opacity_widget = Instance(GaussianHeightWidget)
@@ -127,7 +127,7 @@ class GaussianComponent(BaseColorComponent):
         """ Create an instance from `nodes`.
         """
         color_node = _get_node(nodes, WindowColorNode)
-        opacity_node = _get_node(nodes, GaussianOpacityNode)
+        opacity_node = _get_node(nodes, WindowOpacityNode)
         if len(nodes) != 2 and (color_node is None or opacity_node is None):
             raise ValueError('Expecting two Gaussian function nodes!')
 
@@ -230,7 +230,7 @@ class GaussianComponent(BaseColorComponent):
 
 # Register our function node
 register_function_node_class(WindowColorNode)
-register_function_node_class(GaussianOpacityNode)
+register_function_node_class(WindowOpacityNode)
 # ... and our function component
 register_function_component_class(WindowColorNode, GaussianComponent)
-register_function_component_class(GaussianOpacityNode, GaussianComponent)
+register_function_component_class(WindowOpacityNode, GaussianComponent)
