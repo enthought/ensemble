@@ -5,7 +5,8 @@ from traits.api import Callable, Enum, Instance, on_trait_change
 
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
-from .function_node import register_function_node_class
+from .function_node import (register_function_node_class,
+                            register_function_node_class_for_back_compat)
 from .movable_component import MovableComponent
 from .opacity_function_component import OpacityNode
 from .utils import clip_to_unit
@@ -231,6 +232,12 @@ class WindowComponent(BaseColorComponent):
 # Register our function node
 register_function_node_class(WindowColorNode)
 register_function_node_class(WindowOpacityNode)
+# REGISTER GAUSSIAN NODES FOR BACKWARD COMPATIBILITY
+# XXX: THESE SHOULD BE REMOVED IN THE (NEXT + 1) RELEASE
+register_function_node_class_for_back_compat('GaussianColorNode',
+                                             WindowColorNode)
+register_function_node_class_for_back_compat('GaussianOpacityNode',
+                                             WindowOpacityNode)
 # ... and our function component
 register_function_component_class(WindowColorNode, WindowComponent)
 register_function_component_class(WindowOpacityNode, WindowComponent)
