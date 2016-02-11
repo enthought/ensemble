@@ -65,7 +65,7 @@ class AddWindowAction(BaseColorAction):
 
 
 class AddOpacityAction(BaseCtfEditorAction):
-    name = 'Add Opacity Node...'
+    name = 'Add Opacity Node'
 
     def perform(self, event):
         screen_position = (event.enable_event.x, event.enable_event.y)
