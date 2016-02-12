@@ -11,6 +11,11 @@ def register_function_node_class(cls):
     _function_node_class_registry[cls.__name__] = cls
 
 
+def register_function_node_class_for_back_compat(name, cls):
+    global __function_node_class_registry
+    _function_node_class_registry[name] = cls
+
+
 class FunctionNode(ABCHasStrictTraits):
     """ An object which represents some contiguous portion of a piecewise
     function.
