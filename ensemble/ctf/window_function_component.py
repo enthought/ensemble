@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.signal import hanning
 
 from traits.api import Callable, Enum, Instance, on_trait_change
 
@@ -9,7 +8,7 @@ from .function_node import (register_function_node_class,
                             register_function_node_class_for_back_compat)
 from .movable_component import MovableComponent
 from .opacity_function_component import OpacityNode
-from .utils import clip_to_unit
+from .utils import clip_to_unit, trapezoid_window
 
 
 HEIGHT_WIDGET_THICKNESS = 6.0
@@ -37,14 +36,14 @@ class WindowColorNode(ColorNode):
 
 
 class WindowOpacityNode(OpacityNode):
-    """ An `OpacityNode` with a non-zero radius and a Hanning shape.
+    """ An `OpacityNode` with a non-zero radius and a trapezoidal shape.
     """
     def values(self):
         center, radius = self.center, self.radius
         num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = hanning(num_samples) * self.opacity
+        ys = trapezoid_window(num_samples) * self.opacity
         return zip(xs, ys)
 
 
@@ -88,7 +87,7 @@ class WindowHeightWidget(MovableComponent):
 
 class WindowComponent(BaseColorComponent):
     """ A `BaseColorComponent` which has some radius and both color and
-    opacity, with the opacity determined by a Hanning function.
+    opacity, with the opacity determined by a window function.
     """
 
     # The opacity node
@@ -130,7 +129,7 @@ class WindowComponent(BaseColorComponent):
         color_node = _get_node(nodes, WindowColorNode)
         opacity_node = _get_node(nodes, WindowOpacityNode)
         if len(nodes) != 2 and (color_node is None or opacity_node is None):
-            raise ValueError('Expecting two Hanning function nodes!')
+            raise ValueError('Expecting two window function nodes!')
 
         return cls(node=color_node, opacity_node=opacity_node)
 
