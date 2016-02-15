@@ -18,6 +18,7 @@ GRAY = (0.6, 0.6, 0.6, 1.0)
 POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MAX_NUM_SAMPLES = 256
 MINIMUM_RADIUS = 0.005
+DEFAULT_RADIUS = 2 * MINIMUM_RADIUS
 
 
 def _get_node(nodes, node_class):
