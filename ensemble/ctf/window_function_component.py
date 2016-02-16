@@ -1,6 +1,8 @@
 import numpy as np
+from scipy.signal import hanning
 
-from traits.api import Callable, Enum, Instance, on_trait_change
+from traits.api import (Callable, Enum, Instance, List, Property,
+                        on_trait_change)
 
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
@@ -19,6 +21,11 @@ POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MAX_NUM_SAMPLES = 256
 MINIMUM_RADIUS = 0.005
 DEFAULT_RADIUS = 2 * MINIMUM_RADIUS
+DEFAULT_WINDOW_TYPE = 'trapezoid'
+WINDOW_FUNCTIONS = {
+    'trapezoid': trapezoid_window,
+    'hanning': hanning,
+}
 
 
 def _get_node(nodes, node_class):
@@ -39,13 +46,37 @@ class WindowColorNode(ColorNode):
 class WindowOpacityNode(OpacityNode):
     """ An `OpacityNode` with a non-zero radius and a trapezoidal shape.
     """
+    # Which function should be used to generate the opacity curve?
+    window_func = Property(Callable, depends_on=['_window_type'])
+
+    _window_type = Enum(DEFAULT_WINDOW_TYPE, values='_window_types')
+    _window_types = List(WINDOW_FUNCTIONS.keys())
+
+    @classmethod
+    def from_dict(cls, dictionary):
+        """ Create an instance from the data in `dictionary`.
+        """
+        self = super(WindowOpacityNode, cls).from_dict(dictionary)
+        self._window_type = dictionary.get('window_type', DEFAULT_WINDOW_TYPE)
+        return self
+
+    def to_dict(self):
+        """ Create a dictionary which represents the state of the node.
+        """
+        dictionary = super(WindowOpacityNode, self).to_dict()
+        dictionary['window_type'] = self._window_type
+        return dictionary
+
     def values(self):
         center, radius = self.center, self.radius
         num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = trapezoid_window(num_samples) * self.opacity
+        ys = self.window_func(num_samples) * self.opacity
         return zip(xs, ys)
+
+    def _get_window_func(self):
+        return WINDOW_FUNCTIONS[self._window_type]
 
 
 class WindowHeightWidget(MovableComponent):
