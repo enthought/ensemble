@@ -1,5 +1,7 @@
 import json
 
+import numpy as np
+
 from .transfer_function import TransferFunction
 
 
@@ -33,3 +35,25 @@ def save_ctf(transfer_func, filename):
     function_data = transfer_func.to_dict()
     with open(filename, 'wb') as fp:
         json.dump(function_data, fp, indent=1)
+
+
+def trapezoid_window(num_points):
+    """ Return a window where endpoints are 0 and all other points are 1.0.
+
+    Similar to boxcar or rectangular window in ``scipy.signal`` but with
+    endpoints of 0.
+
+    Parameters
+    ----------
+    num_points : int
+        Number of points in the output window. If zero or less, an empty array
+        is returned.
+    """
+    if num_points <= 0:
+        return np.array([], dtype='float64')
+    w = np.ones(num_points, dtype='float64')
+
+    # Set endpoints of window
+    w[0] = 0
+    w[-1] = 0
+    return w
