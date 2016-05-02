@@ -1,4 +1,4 @@
-
+import vtk
 from vtk.util import vtkConstants
 
 from mayavi.core.common import error
@@ -9,6 +9,7 @@ from traits.api import Dict, Instance, Str
 from tvtk.api import tvtk
 from tvtk.common import configure_input
 
+vtk_major_version = vtk.vtkVersion().GetVTKMajorVersion()
 
 class Volume3D(Volume):
     """ Subclass to provide access to VolumeTextureMapper3D.
@@ -52,24 +53,28 @@ class Volume3D(Volume):
             old_vm.on_trait_change(self.render, remove=True)
 
         ray_cast_functions = ['']
-        if value == 'RayCastMapper':
-            new_vm = self._get_mapper(tvtk.VolumeRayCastMapper)
-            vrc_func = tvtk.VolumeRayCastCompositeFunction()
-            new_vm.volume_ray_cast_function = vrc_func
-            ray_cast_functions = ['RayCastCompositeFunction',
-                                  'RayCastMIPFunction',
-                                  'RayCastIsosurfaceFunction']
-        elif value == 'TextureMapper2D':
-            new_vm = self._get_mapper(tvtk.VolumeTextureMapper2D)
-        elif value == 'VolumeTextureMapper3D':
-            new_vm = self._get_mapper(tvtk.VolumeTextureMapper3D)
-        elif value == 'VolumeProMapper':
-            new_vm = self._get_mapper(tvtk.VolumeProMapper)
-        elif value == 'FixedPointVolumeRayCastMapper':
-            new_vm = self._get_mapper(tvtk.FixedPointVolumeRayCastMapper)
+        if vtk_major_version > 6:
+            new_vm = self._get_mapper(tvtk.SmartVolumeMapper)
+            new_vm.requested_render_mode = 'default'
         else:
-            msg = "Unsupported volume mapper type: '{0}'".format(value)
-            raise ValueError(msg)
+            if value == 'RayCastMapper':
+                new_vm = self._get_mapper(tvtk.VolumeRayCastMapper)
+                vrc_func = tvtk.VolumeRayCastCompositeFunction()
+                new_vm.volume_ray_cast_function = vrc_func
+                ray_cast_functions = ['RayCastCompositeFunction',
+                                    'RayCastMIPFunction',
+                                    'RayCastIsosurfaceFunction']
+            elif value == 'TextureMapper2D':
+                new_vm = self._get_mapper(tvtk.VolumeTextureMapper2D)
+            elif value == 'VolumeTextureMapper3D':
+                new_vm = self._get_mapper(tvtk.VolumeTextureMapper3D)
+            elif value == 'VolumeProMapper':
+                new_vm = self._get_mapper(tvtk.VolumeProMapper)
+            elif value == 'FixedPointVolumeRayCastMapper':
+                new_vm = self._get_mapper(tvtk.FixedPointVolumeRayCastMapper)
+            else:
+                msg = "Unsupported volume mapper type: '{0}'".format(value)
+                raise ValueError(msg)
 
         self._volume_mapper = new_vm
         self._ray_cast_functions = ray_cast_functions
