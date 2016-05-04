@@ -1,4 +1,4 @@
-
+import vtk
 from vtk.util import vtkConstants
 
 from mayavi.core.common import error
@@ -99,4 +99,38 @@ class Volume3DFactory(DataModuleFactory):
     volume_mapper_type = Str('VolumeTextureMapper3D',
                              adapts='volume_mapper_type')
 
-volume3d = make_function(Volume3DFactory)
+
+class SmartVolume3D(Volume3D):
+    """ Subclass to provide access to SmartVolumeMapper
+    """
+    def _volume_mapper_type_changed(self, value):
+        if self.module_manager is None:
+            return
+
+        old_vm = self._volume_mapper
+        if old_vm is not None:
+            old_vm.on_trait_change(self.render, remove=True)
+
+        new_vm = self._get_mapper(tvtk.SmartVolumeMapper)
+        new_vm.requested_render_mode = 'default'
+
+        self._volume_mapper = new_vm
+
+        configure_input(new_vm, self.module_manager.source.outputs[0])
+        self.volume.mapper = new_vm
+        new_vm.on_trait_change(self.render)
+
+
+class SmartVolume3DFactory(DataModuleFactory):
+    """ Applies the Volume3D Mayavi module to the given VTK data source.
+    """
+    _target = Instance(SmartVolume3D, ())
+
+
+vtk_major_version = vtk.vtkVersion().GetVTKMajorVersion()
+
+
+if vtk_major_version > 6:
+    volume3d = make_function(SmartVolume3DFactory)
+else:
+    volume3d = make_function(Volume3DFactory)

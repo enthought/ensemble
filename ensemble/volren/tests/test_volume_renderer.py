@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 
+import vtk
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 from tvtk.api import tvtk
 
@@ -15,6 +16,7 @@ from ensemble.volren.volume_viewer import VolumeViewer, CLIP_MAX
 AXES_ACTOR_CLASS = tvtk.CubeAxesActor
 CUT_PLANE_ACTOR_CLASS = tvtk.ImagePlaneWidget
 CLIP_BOUNDS = [0, CLIP_MAX/2, 0, CLIP_MAX/2, 0, CLIP_MAX/2]
+VTK_MAJOR_VERSION = vtk.vtkVersion.GetVTKMajorVersion()
 
 
 def count_types(type_class, obj_list):
@@ -75,6 +77,12 @@ enamldef MainView(Container): view:
 
     def test_renderer_initialized(self):
         self.assertTrue(self.viewer.volume_renderer.volume is not None)
+        volume_mapper = self.viewer.volume_renderer.volume._volume_mapper
+        if VTK_MAJOR_VERSION > 6:
+            self.assertIsInstance(volume_mapper, tvtk.SmartVolumeMapper)
+            self.assertEqual(volume_mapper.requested_render_mode, 'default')
+        else:
+            self.assertNotIsInstance(volume_mapper, tvtk.SmartVolumeMapper)
 
         # Count various actor types in the scene.
         scene_model = self.viewer.model
