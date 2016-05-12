@@ -31,6 +31,7 @@ WINDOW_FUNCTIONS = {
     'trapezoid': trapezoid_window,
     'hanning': hanning,
 }
+WindowEnum = Enum(WINDOW_FUNCTIONS.keys())
 
 
 def _get_node(nodes, node_class):
@@ -69,8 +70,7 @@ class WindowOpacityNode(OpacityNode):
     window_func = Property(Callable, depends_on=['window_type'])
 
     # The name of the window function
-    window_type = Enum(DEFAULT_WINDOW_TYPE, values='_window_types')
-    _window_types = List(WINDOW_FUNCTIONS.keys())
+    window_type = WindowEnum(DEFAULT_WINDOW_TYPE)
 
     @classmethod
     def from_dict(cls, dictionary):
