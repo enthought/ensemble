@@ -72,6 +72,11 @@ class WindowOpacityNode(OpacityNode):
     # The name of the window function
     window_type = WindowEnum(DEFAULT_WINDOW_TYPE)
 
+    def copy(self):
+        obj = super(WindowOpacityNode, self).copy()
+        obj.window_type = self.window_type
+        return obj
+
     @classmethod
     def from_dict(cls, dictionary):
         """ Create an instance from the data in `dictionary`.
