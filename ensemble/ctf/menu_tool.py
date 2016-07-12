@@ -1,7 +1,7 @@
 from enable.component import Component
 from enable.tools.pyface.context_menu_tool import ContextMenuTool
 from pyface.action.api import Action, Group, MenuManager
-from traits.api import Instance, List
+from traits.api import HasTraits, Instance, List
 
 
 def menu_tool_with_actions(component, actions):
@@ -11,7 +11,7 @@ def menu_tool_with_actions(component, actions):
 
 
 class FunctionMenuTool(ContextMenuTool):
-    actions = List(Instance(Action))
+    actions = List(Instance(HasTraits))
 
     def _menu_manager_default(self):
         return MenuManager(Group(*self.actions))

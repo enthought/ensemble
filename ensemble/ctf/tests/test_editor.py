@@ -3,7 +3,10 @@ import unittest
 from enable.testing import EnableTestAssistant
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 
-from ensemble.ctf.api import CtfEditor, ColorNode, OpacityNode
+from ensemble.ctf.api import (CtfEditor, ColorNode, OpacityNode,
+                              WindowColorNode, WindowOpacityNode,
+                              WindowComponent)
+from ensemble.ctf.window_function_component import WindowTypeAction
 
 
 def get_color(starting_color=None):
@@ -36,6 +39,10 @@ enamldef MainView(MainWindow):
         function = editor.function.copy()
         function.color.insert(ColorNode(center=0.25, color=(1.0, 0.0, 0.0)))
         function.opacity.insert(OpacityNode(center=0.5, opacity=0.5))
+        window_col = WindowColorNode(center=0.75, color=(0.0, 1.0, 1.0))
+        window_op = WindowOpacityNode(center=0.75, opacity=0.5,
+                                      window_type='hanning')
+        function.add_linked_nodes(window_col, window_op)
         editor.function = function
 
         self.editor = editor
@@ -96,6 +103,20 @@ enamldef MainView(MainWindow):
         # Ask for a redraw to test re-drawing.
         with self.event_loop():
             editor.request_redraw()
+
+    def test_set_window_type(self):
+        editor = self.editor
+        function = editor.function
+        component = [com for com in editor.components
+                     if isinstance(com, WindowComponent)][0]
+        node = function.opacity.node_at(2)
+        action = WindowTypeAction(name='Trapezoid', function=function,
+                                  component=component)
+
+        # change the window_type
+        with self.assertTraitChanges(node, 'window_type'):
+            action.perform(None)
+
 
 if __name__ == '__main__':
     unittest.main()

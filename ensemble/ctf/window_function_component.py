@@ -1,13 +1,20 @@
 import numpy as np
+from scipy.signal import hanning
 
-from traits.api import Callable, Enum, Instance, on_trait_change
+from pyface.action.api import Action, MenuManager
+from traits.api import (Callable, Enum, Instance, List, Property,
+                        on_trait_change)
 
 from .base_color_function_component import BaseColorComponent, ColorNode
-from .function_component import register_function_component_class
+from .function_component import (
+    FunctionComponent, register_function_component_class
+)
 from .function_node import (register_function_node_class,
                             register_function_node_class_for_back_compat)
+from .menu_tool import menu_tool_with_actions
 from .movable_component import MovableComponent
 from .opacity_function_component import OpacityNode
+from .transfer_function import TransferFunction
 from .utils import clip_to_unit, trapezoid_window
 
 
@@ -19,6 +26,12 @@ POINTER_MAP = {'move': 'hand', 'resize': 'size left'}
 MAX_NUM_SAMPLES = 256
 MINIMUM_RADIUS = 0.005
 DEFAULT_RADIUS = 2 * MINIMUM_RADIUS
+DEFAULT_WINDOW_TYPE = 'trapezoid'
+WINDOW_FUNCTIONS = {
+    'trapezoid': trapezoid_window,
+    'hanning': hanning,
+}
+WindowEnum = Enum(WINDOW_FUNCTIONS.keys())
 
 
 def _get_node(nodes, node_class):
@@ -26,6 +39,20 @@ def _get_node(nodes, node_class):
         if isinstance(node, node_class):
             return node
     return None
+
+
+class WindowTypeAction(Action):
+    """ Sets the window type of a `WindowOpacityNode`.
+    """
+    # The WindowComponent being edited.
+    component = Instance(FunctionComponent)
+
+    # The function where our node lives
+    function = Instance(TransferFunction)
+
+    def perform(self, event):
+        self.component.opacity_node.window_type = self.name.lower()
+        self.function.updated = True
 
 
 class WindowColorNode(ColorNode):
@@ -39,13 +66,42 @@ class WindowColorNode(ColorNode):
 class WindowOpacityNode(OpacityNode):
     """ An `OpacityNode` with a non-zero radius and a trapezoidal shape.
     """
+    # The function used to generate the opacity curve.
+    window_func = Property(Callable, depends_on=['window_type'])
+
+    # The name of the window function
+    window_type = WindowEnum(DEFAULT_WINDOW_TYPE)
+
+    def copy(self):
+        obj = super(WindowOpacityNode, self).copy()
+        obj.window_type = self.window_type
+        return obj
+
+    @classmethod
+    def from_dict(cls, dictionary):
+        """ Create an instance from the data in `dictionary`.
+        """
+        self = super(WindowOpacityNode, cls).from_dict(dictionary)
+        self.window_type = dictionary.get('window_type', DEFAULT_WINDOW_TYPE)
+        return self
+
+    def to_dict(self):
+        """ Create a dictionary which represents the state of the node.
+        """
+        dictionary = super(WindowOpacityNode, self).to_dict()
+        dictionary['window_type'] = self.window_type
+        return dictionary
+
     def values(self):
         center, radius = self.center, self.radius
         num_samples = int(np.round(radius * 2.0 * MAX_NUM_SAMPLES))
 
         xs = np.linspace(center - radius, center + radius, num_samples)
-        ys = trapezoid_window(num_samples) * self.opacity
+        ys = self.window_func(num_samples) * self.opacity
         return zip(xs, ys)
+
+    def _get_window_func(self):
+        return WINDOW_FUNCTIONS[self.window_type]
 
 
 class WindowHeightWidget(MovableComponent):
@@ -198,6 +254,16 @@ class WindowComponent(BaseColorComponent):
     # -----------------------------------------------------------------------
     # Traits methods
     # -----------------------------------------------------------------------
+
+    def _tools_default(self):
+        menu_tool = super(WindowComponent, self)._tools_default()[0]
+        actions = menu_tool.actions
+        function = self.container.function
+        items = [WindowTypeAction(name=name.capitalize(), component=self,
+                                  function=function)
+                 for name in WINDOW_FUNCTIONS.keys()]
+        actions.append(MenuManager(*items, name='Window Type'))
+        return [menu_tool_with_actions(self, actions)]
 
     @on_trait_change('opacity_node.opacity')
     def _node_values_changed(self):
