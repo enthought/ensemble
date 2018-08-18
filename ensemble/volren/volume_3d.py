@@ -24,7 +24,7 @@ class Volume3D(Volume):
     def _setup_mapper_types(self):
         """Sets up the mapper based on input data types.
         """
-        input = self.module_manager.source.outputs[0]
+        input = self.module_manager.source.get_output_dataset()
         data_types = (vtkConstants.VTK_UNSIGNED_CHAR,
                       vtkConstants.VTK_UNSIGNED_SHORT)
         mapper_types = []
