@@ -82,8 +82,8 @@ class VolumeData(HasStrictTraits):
     spacing = Tuple(Float, Float, Float)
 
     # A resampled/masked version of the data, suitable for rendering
-    render_data = Property(Instance(tvtk.ImageData))
-    _render_data = Instance(tvtk.ImageData)
+    render_data = Property(Instance(tvtk.DataObject))
+    _render_data = Instance(tvtk.DataObject)
 
     # -------------------------------------------------------------------------
     # Public interface
