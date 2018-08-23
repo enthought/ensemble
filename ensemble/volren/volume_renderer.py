@@ -146,7 +146,8 @@ class VolumeRenderer(HasStrictTraits):
 
     def _setup_volume(self):
         render_settings = QUALITY_SETTINGS[self.render_quality]
-        self.volume.volume_mapper.trait_set(**render_settings['mapper'])
+        if hasattr(self.volume.volume_mapper, 'sample_distance'):
+            self.volume.volume_mapper.trait_set(**render_settings['mapper'])
         self.volume.volume_property.trait_set(**render_settings['property'])
         self._set_volume_clip_planes()
         self.set_transfer_function()

@@ -1,4 +1,3 @@
-import vtk
 from vtk.util import vtkConstants
 
 from mayavi.core.common import error
@@ -10,12 +9,18 @@ from tvtk.api import tvtk
 from tvtk.common import configure_input
 
 
+if hasattr(tvtk, 'SmartVolumeMapper'):
+    DEFAULT_MAPPER = 'SmartVolumeMapper'
+else:
+    DEFAULT_MAPPER = 'VolumeTextureMapper3D'
+
+
 class Volume3D(Volume):
     """ Subclass to provide access to VolumeTextureMapper3D.
     """
 
     volume_mapper_type = DEnum(values_name='_mapper_types',
-                               value='VolumeTextureMapper3D',
+                               value=DEFAULT_MAPPER,
                                desc='volume mapper to use')
 
     def _update_ctf_fired(self):
@@ -28,6 +33,9 @@ class Volume3D(Volume):
         data_types = (vtkConstants.VTK_UNSIGNED_CHAR,
                       vtkConstants.VTK_UNSIGNED_SHORT)
         mapper_types = []
+        if hasattr(tvtk, 'VolumeTextureMapper3D'):
+            self._available_mapper_types.append('VolumeTextureMapper3D')
+
         if input.point_data.scalars.data_type not in data_types:
             if 'FixedPointVolumeRayCastMapper' in self._available_mapper_types:
                 mapper_types = ['FixedPointVolumeRayCastMapper']
@@ -35,12 +43,13 @@ class Volume3D(Volume):
                 error('Available volume mappers only work with \
                       unsigned_char or unsigned_short datatypes')
         else:
-            mapper_types = ['TextureMapper2D', 'RayCastMapper']
-            check = ['FixedPointVolumeRayCastMapper', 'VolumeProMapper']
+            mapper_types = []
+            check = ['SmartVolumeMapper', 'VolumeTextureMapper3D',
+                     'FixedPointVolumeRayCastMapper',
+                     'VolumeProMapper', 'TextureMapper2D', 'RayCastMapper']
             for mapper in check:
                 if mapper in self._available_mapper_types:
                     mapper_types.append(mapper)
-        mapper_types.append('VolumeTextureMapper3D')
         self._mapper_types = mapper_types
 
     def _volume_mapper_type_changed(self, value):
@@ -67,6 +76,9 @@ class Volume3D(Volume):
             new_vm = self._get_mapper(tvtk.VolumeProMapper)
         elif value == 'FixedPointVolumeRayCastMapper':
             new_vm = self._get_mapper(tvtk.FixedPointVolumeRayCastMapper)
+        elif value == 'SmartVolumeMapper':
+            new_vm = self._get_mapper(tvtk.SmartVolumeMapper)
+            new_vm.requested_render_mode = 'default'
         else:
             msg = "Unsupported volume mapper type: '{0}'".format(value)
             raise ValueError(msg)
@@ -96,41 +108,8 @@ class Volume3DFactory(DataModuleFactory):
     """ Applies the Volume3D Mayavi module to the given VTK data source.
     """
     _target = Instance(Volume3D, ())
-    volume_mapper_type = Str('VolumeTextureMapper3D',
+    volume_mapper_type = Str(DEFAULT_MAPPER,
                              adapts='volume_mapper_type')
 
 
-class SmartVolume3D(Volume3D):
-    """ Subclass to provide access to SmartVolumeMapper
-    """
-    def _volume_mapper_type_changed(self, value):
-        if self.module_manager is None:
-            return
-
-        old_vm = self._volume_mapper
-        if old_vm is not None:
-            old_vm.on_trait_change(self.render, remove=True)
-
-        new_vm = self._get_mapper(tvtk.SmartVolumeMapper)
-        new_vm.requested_render_mode = 'default'
-
-        self._volume_mapper = new_vm
-
-        configure_input(new_vm, self.module_manager.source.outputs[0])
-        self.volume.mapper = new_vm
-        new_vm.on_trait_change(self.render)
-
-
-class SmartVolume3DFactory(DataModuleFactory):
-    """ Applies the Volume3D Mayavi module to the given VTK data source.
-    """
-    _target = Instance(SmartVolume3D, ())
-
-
-vtk_major_version = vtk.vtkVersion().GetVTKMajorVersion()
-
-
-if vtk_major_version > 6:
-    volume3d = make_function(SmartVolume3DFactory)
-else:
-    volume3d = make_function(Volume3DFactory)
+volume3d = make_function(Volume3DFactory)
