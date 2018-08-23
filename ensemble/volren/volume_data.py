@@ -1,6 +1,7 @@
 import numpy as np
 
-from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
+from traits.api import (HasStrictTraits, Array, Bool, Float, Instance, Property,
+                        Tuple)
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data, is_old_pipeline
 
@@ -84,6 +85,7 @@ class VolumeData(HasStrictTraits):
     # A resampled/masked version of the data, suitable for rendering
     render_data = Property(Instance(tvtk.ImageData))
     _render_data = Instance(tvtk.ImageData)
+    _refresh_render_data = Bool(False)
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -107,20 +109,25 @@ class VolumeData(HasStrictTraits):
     def _get_render_data(self):
         if self._render_data is None:
             self._render_data = self._prepare_data()
+        elif self._refresh_render_data:
+            new_data = self._prepare_data()
+            # Since we are resampling onto a 256^3 cube, which we already have,
+            # we just need to update the scalars and we are done.
+            self._render_data.point_data.scalars = new_data.point_data.scalars
         return self._render_data
 
     def _get_mask_data(self):
         return self._mask_data
 
     def _set_mask_data(self, value):
-        self._render_data = None
+        self._refresh_render_data = True
         self._mask_data = np.asfortranarray(value)
 
     def _get_raw_data(self):
         return self._raw_data
 
     def _set_raw_data(self, value):
-        self._render_data = None
+        self._refresh_render_data = True
         self._raw_data = np.asfortranarray(value)
 
     # -------------------------------------------------------------------------
@@ -128,6 +135,7 @@ class VolumeData(HasStrictTraits):
     # -------------------------------------------------------------------------
 
     def _prepare_data(self):
+        self._refresh_render_data = False
         image_data = _image_data_from_array(self.raw_data, self.spacing)
         resampled_data = _resample_data(image_data)
 
