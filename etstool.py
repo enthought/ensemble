@@ -109,7 +109,7 @@ environment_vars = {
 }
 
 extra_dependencies = {}
-supported_combinations = {'2.7': ['pyside']}
+supported_combinations = {'2.7': {'pyside'}}
 
 @click.group()
 def cli():
@@ -133,7 +133,7 @@ def install(runtime, toolkit, environment):
         "edm install -y -e {environment} " + packages,
         "edm run -e {environment} -- pip install -r ci-src-requirements.txt --no-dependencies",
         "edm run -e {environment} -- python setup.py clean --all",
-        "edm run -e {environment} -- python setup.py install"
+        "edm run -e {environment} -- python setup.py develop"
     ]
     # pip install pyqt5, because we don't have it in EDM yet
     if toolkit == 'pyqt5':
