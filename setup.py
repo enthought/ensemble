@@ -15,7 +15,7 @@ setup(
     url='https://github.com/enthought/ensemble',
     description='High-level widgets for building Python applications',
     long_description=open('README.rst').read(),
-    packages=find_packages(exclude=('*.tests',)),
+    packages=find_packages(),
     include_package_data=True,
     package_data={'ensemble.volren': ['*.enaml']},
     requires=[],
