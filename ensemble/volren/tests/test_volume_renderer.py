@@ -58,6 +58,7 @@ enamldef MainView(Container): view:
             self.view.show()
 
     def tearDown(self):
+        self.view.destroy()
         self.view = None
         self.viewer = None
         EnamlTestAssistant.tearDown(self)
