@@ -2,8 +2,7 @@ import numpy as np
 from scipy.signal import hanning
 
 from pyface.action.api import Action, MenuManager
-from traits.api import (Callable, Enum, Instance, List, Property,
-                        on_trait_change)
+from traits.api import Callable, Enum, Instance, Property, on_trait_change
 
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import (

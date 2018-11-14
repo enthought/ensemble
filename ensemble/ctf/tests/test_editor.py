@@ -73,7 +73,7 @@ enamldef MainView(MainWindow):
 
         # Move the opacity node around.
         with self.assertTraitChanges(node, 'center'), \
-             self.assertTraitChanges(node, 'opacity'):
+             self.assertTraitChanges(node, 'opacity'):  # noqa
                 self.press_move_release(editor,
                                         [initial_pos, middle_pos, final_pos])
 

@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # Copyright (c) 2013-14, Enthought, Inc.
 # All rights reserved.
@@ -10,7 +10,7 @@
 #
 # Thanks for using Enthought open source!
 #
-#----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # load qt from enaml in order to set the setapi before the tests import
 # QtCore (see traits-enaml github issue #39).
 from enaml import qt
