@@ -92,7 +92,6 @@ dependencies = {
     "enable",
     "enaml",
     "envisage",
-    "mayavi",
     "mock",
     "nose",
     "pyface",
@@ -101,7 +100,7 @@ dependencies = {
     "traits",
     "traits_enaml",
     "traitsui",
-    "vtk"
+    "vtk^=6.3.0",
 }
 
 environment_vars = {
