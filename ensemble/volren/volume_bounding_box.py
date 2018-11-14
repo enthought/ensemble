@@ -13,9 +13,9 @@ class VolumeBoundingBox(ABCVolumeSceneMember):
     # The number of points should be 8 after the bounding box is computed
     outline = Instance(tvtk.OutlineFilter)
 
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # ABCVolumeSceneMember interface
-    #--------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def add_actors_to_scene(self, scene_model, volume_actor):
 

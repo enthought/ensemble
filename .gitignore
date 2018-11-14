@@ -1,4 +1,5 @@
 */_version.py
+.coverage*
 *.pyc
 *.un~
 *.swp
