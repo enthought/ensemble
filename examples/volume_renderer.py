@@ -33,8 +33,8 @@ def build_volume_data(cmdline_args):
     else:
         import tables
 
-        with closing(tables.openFile(cmdline_args.volume_file)) as h5:
-            volume = h5.getNode(cmdline_args.node)[:].T
+        with closing(tables.open_file(cmdline_args.volume_file)) as h5:
+            volume = h5.get_node('/' + cmdline_args.node)[:].T
 
     volume_data_kwargs = {'raw_data': volume}
     if cmdline_args.mask:
