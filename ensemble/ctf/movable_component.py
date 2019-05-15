@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from enable.api import Container
 from enable.toolkit_constants import pointer_names
 from traits.api import Enum, Float

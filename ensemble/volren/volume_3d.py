@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from mayavi.core.trait_defs import DEnum
 from mayavi.modules.volume import Volume
 from mayavi.tools.modules import DataModuleFactory, make_function

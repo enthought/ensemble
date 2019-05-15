@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from traits.api import HasStrictTraits, Event, Instance, List, Property
 
 from .piecewise import PiecewiseFunction

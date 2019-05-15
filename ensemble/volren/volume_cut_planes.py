@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from collections import OrderedDict
 
 from mayavi import mlab
@@ -8,9 +9,9 @@ from .volume_scene_member import ABCVolumeSceneMember
 
 
 CUT_COLORMAPS = OrderedDict([
-    (u'Gray', 'gray'),
-    (u'Bone', 'bone'),
-    (u'RdBu', 'RdBu'),
+    ('Gray', 'gray'),
+    ('Bone', 'bone'),
+    ('RdBu', 'RdBu'),
 ])
 
 

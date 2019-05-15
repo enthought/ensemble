@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from traits.api import Bool, Enum, Float, Tuple, Unicode
 from tvtk.api import tvtk
 

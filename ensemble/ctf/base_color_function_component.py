@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from pyface.action.api import Action
 from traits.api import Callable, Float, Instance, Tuple
 

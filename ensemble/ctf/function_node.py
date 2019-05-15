@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from abc import abstractmethod
 
 from traits.api import ABCHasStrictTraits, Float

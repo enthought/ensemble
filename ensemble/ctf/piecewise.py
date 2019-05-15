@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from bisect import bisect
 from operator import add, sub
 
