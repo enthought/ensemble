@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import numpy as np
+import six
 
 from enable.api import ColorTrait, Container
 from pyface.action.api import Action
@@ -209,7 +210,11 @@ class CtfEditor(Container):
             gc.rect(0, 0, w, h)
             # XXX : We need to pass byte strings instead of unicode strings.
             # See https://github.com/enthought/enable/issues/342
-            gc.linear_gradient(0, 0, w, 0, grad_stops, b'pad', b'userSpaceOnUse')
+            if six.PY2:
+                args = (b'pad', b'userSpaceOnUse')
+            else:
+                args = ('pad', 'userSpaceOnUse')
+            gc.linear_gradient(0, 0, w, 0, grad_stops, *args)
             gc.fill_path()
 
     def _draw_histogram(self, gc):
