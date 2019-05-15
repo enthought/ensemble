@@ -9,6 +9,16 @@ cache:
   directories:
     - "~/.cache"
 
+matrix:
+  include:
+    - env: RUNTIME=2.7 TOOLKIT="pyside"
+    - env: RUNTIME=3.6 TOOLKIT="pyqt"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKIT="pyside"
+    - os: osx
+      env: RUNTIME=3.6 TOOLKIT="pyqt"
+  fast_finish: true
+
 before_install:
   - mkdir -p "${HOME}/.cache/download"
   - export DISPLAY=:99.0
@@ -19,9 +29,9 @@ before_install:
   - export IS_CI=1
   - edm install -y wheel click coverage
 install:
-  - edm run -- python -m etstool install
+  - edm run -- python -m etstool install --runtime=${RUNTIME} --toolkit=${TOOLKIT}
 script:
-  - edm run -- python -m etstool test
+  - edm run -- python -m etstool test --runtime=${RUNTIME} --toolkit=${TOOLKIT}
 after_success:
   - edm run -- coverage combine
   - edm run -- pip install codecov
