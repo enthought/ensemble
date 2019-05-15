@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import numpy as np
 
 from enable.api import ColorTrait, Container
@@ -205,7 +207,9 @@ class CtfEditor(Container):
 
         with gc:
             gc.rect(0, 0, w, h)
-            gc.linear_gradient(0, 0, w, 0, grad_stops, 'pad', 'userSpaceOnUse')
+            # XXX : We need to pass byte strings instead of unicode strings.
+            # See https://github.com/enthought/enable/issues/342
+            gc.linear_gradient(0, 0, w, 0, grad_stops, b'pad', b'userSpaceOnUse')
             gc.fill_path()
 
     def _draw_histogram(self, gc):
