@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 import glob
 import os
@@ -12,11 +14,13 @@ CTF_EXTENSION = '.ctf'
 
 
 def _name_encode(name):
-    return urlsafe_b64encode(name.encode('utf-8'))
+    # Accepts a unicode input and returns a unicode output
+    return urlsafe_b64encode(name.encode('utf-8')).decode('utf-8')
 
 
 def _name_decode(name):
-    return urlsafe_b64decode(name).decode('utf-8')
+    # Accepts a unicode input and returns a unicode output
+    return urlsafe_b64decode(name.encode('utf-8')).decode('utf-8')
 
 
 class CtfManager(HasStrictTraits):
