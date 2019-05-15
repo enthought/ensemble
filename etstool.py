@@ -92,23 +92,28 @@ dependencies = {
     "enable",
     "enaml",
     "envisage",
+    "mayavi",
     "mock",
     "nose",
     "pyface",
-    "pyside",
     "scipy",
     "traits",
     "traits_enaml",
     "traitsui",
-    "vtk^=6.3.0",
+    "vtk",
 }
 
 environment_vars = {
     'pyside': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyside'},
+    'pyqt': {'ETS_TOOLKIT': 'qt4', 'QT_API': 'pyqt'},
 }
 
-extra_dependencies = {}
-supported_combinations = {'2.7': {'pyside'}}
+extra_dependencies = {
+    'pyside': {'pyside'},
+    'pyqt': {'pyqt<4.12'}
+}
+
+supported_combinations = {'2.7': {'pyside'}, '3.6': {'pyqt'}}
 
 @click.group()
 def cli():

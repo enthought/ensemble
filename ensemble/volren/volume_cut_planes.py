@@ -94,7 +94,7 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
     def _find_volume_data_source(self, scene_model, volume_actor):
         volume_image_data = volume_actor.mapper.input
         for child in scene_model.mayavi_scene.children:
-            if volume_image_data in child.outputs:
+            if volume_image_data == child.get_output_dataset():
                 return child
 
         return None
