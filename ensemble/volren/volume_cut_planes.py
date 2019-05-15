@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from mayavi import mlab
 from mayavi.core.api import PipelineBase
-from traits.api import Enum, Instance, List, Range, Str, on_trait_change
+from traits.api import Enum, Instance, List, Range, on_trait_change, Unicode
 
 from .volume_scene_member import ABCVolumeSceneMember
 
@@ -24,7 +24,7 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
     image_plane_widget_z = Instance(PipelineBase)
 
     # Colormap selection
-    available_cut_colormaps = List(Str, CUT_COLORMAPS.keys())
+    available_cut_colormaps = List(Unicode, CUT_COLORMAPS.keys())
     selected_cut_color_map = Enum(values='available_cut_colormaps')
 
     # A global multiplier to the opacity transfer function.

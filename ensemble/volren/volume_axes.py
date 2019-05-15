@@ -1,4 +1,4 @@
-from traits.api import Bool, Enum, Float, Str, Tuple
+from traits.api import Bool, Enum, Float, Tuple, Unicode
 from tvtk.api import tvtk
 
 from .volume_scene_member import ABCVolumeSceneMember
@@ -21,13 +21,13 @@ class VolumeAxes(ABCVolumeSceneMember):
     visible_axis_scales = Tuple(Bool, Bool, Bool)
 
     # Axes titles.
-    axis_titles = Tuple(Str, Str, Str)
+    axis_titles = Tuple(Unicode, Unicode, Unicode)
 
     # Axes units.
-    axis_units = Tuple(Str, Str, Str)
+    axis_units = Tuple(Unicode, Unicode, Unicode)
 
     # Axes labels format.
-    axis_label_formats = Tuple(Str, Str, Str)
+    axis_label_formats = Tuple(Unicode, Unicode, Unicode)
 
     # Fly mode, determining the position of the axes on the bounding box.
     fly_mode = Enum(('static_triad', 'closest_triad', 'furthest_triad',
