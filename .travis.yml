@@ -1,26 +1,30 @@
-language: python
-python:
-  - "2.7"
-virtualenv:
-  system_site_packages: true
+language: generic
+sudo: false
+
+env:
+  global:
+    - INSTALL_EDM_VERSION=1.10.0
+
+cache:
+  directories:
+    - "~/.cache"
+
 before_install:
+  - mkdir -p "${HOME}/.cache/download"
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
-  - sudo apt-get update
-  - sudo apt-get install python-scipy
-  - sudo apt-get install python-vtk python-qt4 python-qt4-dev python-sip python-qt4-gl libqt4-scripttools swig
+  - sh -e install-edm-linux.sh
+  - export PATH="${HOME}/edm/bin:${PATH}"
   - export ETS_TOOLKIT=qt4
+  - edm install -y wheel click coverage
 install:
-  # Since we cannot control the order that the dev_requirements file will be installed, we have to use
-  # setuptools==9.1 to avoid issue https://github.com/enthought/enable/issues/179
-  - pip install setuptools==9.1
-  - pip install coveralls
-  - pip install -r dev_requirements.txt
-  - python setup.py develop
+  - edm run -- python -m etstool install
 script:
-  coverage run -m nose.core -v
+  - edm run -- python -m etstool test
+after_success:
+  - edm run -- coverage combine
+  - edm run -- pip install codecov
+  - edm run -- codecov
 notifications:
   email:
     - travis-ci@enthought.com
-after_script:
-  - coveralls

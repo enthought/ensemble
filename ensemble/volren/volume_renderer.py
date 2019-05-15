@@ -83,7 +83,7 @@ class VolumeRenderer(HasStrictTraits):
     def set_transfer_function(self, colors=None, opacities=None):
         """ Update the volume mapper's transfer function.
         """
-        lerp = lambda x: self.vmin + x * (self.vmax - self.vmin)
+        lerp = lambda x: self.vmin + x * (self.vmax - self.vmin)  # noqa
 
         if colors is not None:
             self.colors = colors
