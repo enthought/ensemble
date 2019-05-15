@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import numpy as np
@@ -23,6 +24,9 @@ def count_types(type_class, obj_list):
     return sum(int(isinstance(obj, type_class)) for obj in obj_list)
 
 
+# We use a newer version of VTK (8) which needs a newer version of OpenGL 3.2
+# which is not available on Travis CI at the moment
+@unittest.skipIf(os.environ.get('IS_CI', None), "Travis OpenGL issues")
 class VolumeViewerTestCase(EnamlTestAssistant, unittest.TestCase):
 
     def setUp(self):

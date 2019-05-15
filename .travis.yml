@@ -16,6 +16,7 @@ before_install:
   - sh -e install-edm-linux.sh
   - export PATH="${HOME}/edm/bin:${PATH}"
   - export ETS_TOOLKIT=qt4
+  - export IS_CI=1
   - edm install -y wheel click coverage
 install:
   - edm run -- python -m etstool install
