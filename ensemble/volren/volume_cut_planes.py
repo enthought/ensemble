@@ -25,7 +25,7 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
     image_plane_widget_z = Instance(PipelineBase)
 
     # Colormap selection
-    available_cut_colormaps = List(Unicode, CUT_COLORMAPS.keys())
+    available_cut_colormaps = List(Unicode, list(CUT_COLORMAPS.keys()))
     selected_cut_color_map = Enum(values='available_cut_colormaps')
 
     # A global multiplier to the opacity transfer function.

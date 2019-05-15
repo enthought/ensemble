@@ -31,7 +31,7 @@ WINDOW_FUNCTIONS = {
     'trapezoid': trapezoid_window,
     'hanning': hanning,
 }
-WindowEnum = Enum(WINDOW_FUNCTIONS.keys())
+WindowEnum = Enum(list(WINDOW_FUNCTIONS.keys()))
 
 
 def _get_node(nodes, node_class):
