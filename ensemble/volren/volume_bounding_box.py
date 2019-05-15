@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from traits.api import Instance
 from tvtk.api import tvtk
 from tvtk.common import configure_input_data

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import unittest
 
@@ -33,7 +34,7 @@ class VolumeViewerTestCase(EnamlTestAssistant, unittest.TestCase):
 
         EnamlTestAssistant.setUp(self)
 
-        enaml_source = """
+        enaml_source = b"""
 from enaml.widgets.api import Container
 from ensemble.volren.volume_viewer_ui import VolumeViewerContainer
 

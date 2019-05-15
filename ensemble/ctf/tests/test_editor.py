@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import unittest
 
 from enable.testing import EnableTestAssistant
@@ -20,7 +21,7 @@ class TestEditor(EnamlTestAssistant, EnableTestAssistant, unittest.TestCase):
     def setUp(self):
         EnamlTestAssistant.setUp(self)
 
-        enaml_source = """
+        enaml_source = b"""
 from enaml.widgets.api import MainWindow
 from traits_enaml.widgets.enable_canvas import EnableCanvas
 

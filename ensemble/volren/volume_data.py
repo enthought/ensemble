@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import numpy as np
 
 from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple

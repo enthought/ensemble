@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from traits.api import Bool, Float, Instance, Property, Tuple
 
 from .function_node import FunctionNode

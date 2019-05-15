@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from contextlib import contextmanager
 from os import listdir
 import shutil
@@ -71,7 +72,7 @@ def _test_ctf_manager_names(names_to_test):
 
 def test_ctf_manager_crazy_names():
     # Handle unicode and slashes
-    crazy_names = [u'他妈的！// what?', u'/this/looks/like/a/path/Ø']
+    crazy_names = ['他妈的！// what?', '/this/looks/like/a/path/Ø']
     _test_ctf_manager_names(crazy_names)
 
 

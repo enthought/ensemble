@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from enaml.colors import Color
 import traits_enaml
 

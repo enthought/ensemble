@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
 from .function_node import register_function_node_class

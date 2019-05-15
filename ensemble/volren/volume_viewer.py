@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 import numpy as np
 
 from mayavi.core.ui.api import MlabSceneModel
 from traits.api import (Bool, CInt, Dict, Event, HasTraits, Instance, List,
-                        Str, on_trait_change)
+                        on_trait_change, Unicode)
 from tvtk.api import tvtk
 
 from ensemble.ctf.api import CtfEditor, get_color
@@ -36,7 +37,7 @@ class VolumeViewer(HasTraits):
     flip_z = Bool(False)
 
     # Additional members of the scene
-    scene_members = Dict(Str, Instance(ABCVolumeSceneMember))
+    scene_members = Dict(Unicode, Instance(ABCVolumeSceneMember))
 
     # An event fired once the scene has been initialized.
     scene_initialized = Event

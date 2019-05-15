@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,

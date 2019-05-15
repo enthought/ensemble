@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from enable.component import Component
 from enable.tools.pyface.context_menu_tool import ContextMenuTool
 from pyface.action.api import Action, Group, MenuManager

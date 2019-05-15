@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
+
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 import glob
 import os
 
-from traits.api import HasStrictTraits, Dict, Instance, List, Str
+from traits.api import HasStrictTraits, Dict, Instance, List, Unicode
 
 from .transfer_function import TransferFunction
 from .utils import load_ctf, save_ctf
@@ -12,11 +14,13 @@ CTF_EXTENSION = '.ctf'
 
 
 def _name_encode(name):
-    return urlsafe_b64encode(name.encode('utf-8'))
+    # Accepts a unicode input and returns a unicode output
+    return urlsafe_b64encode(name.encode('utf-8')).decode('utf-8')
 
 
 def _name_decode(name):
-    return urlsafe_b64decode(name).decode('utf-8')
+    # Accepts a unicode input and returns a unicode output
+    return urlsafe_b64decode(name.encode('utf-8')).decode('utf-8')
 
 
 class CtfManager(HasStrictTraits):
@@ -24,13 +28,13 @@ class CtfManager(HasStrictTraits):
     """
 
     # The root directory with the files.
-    root_dir = Str('.')
+    root_dir = Unicode('.')
 
     # The available CTFs.
-    names = List(Str)
+    names = List(Unicode)
 
     # The transfer functions by name.
-    functions = Dict(Str, Instance(TransferFunction))
+    functions = Dict(Unicode, Instance(TransferFunction))
 
     @classmethod
     def from_directory(cls, root_dir, **traits):
