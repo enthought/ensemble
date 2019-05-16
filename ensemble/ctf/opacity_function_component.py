@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from traits.api import Float
 
 from .function_component import (FunctionComponent,
@@ -69,7 +70,7 @@ class OpacityComponent(FunctionComponent):
             gc.set_stroke_color(BLACK)
             gc.set_fill_color(GRAY)
             gc.set_line_width(1.0)
-            gc.rect(x - COMPONENT_SIZE/2.0, y - COMPONENT_SIZE/2.0,
+            gc.rect(x - COMPONENT_SIZE/2, y - COMPONENT_SIZE/2,
                     COMPONENT_SIZE, COMPONENT_SIZE)
             gc.draw_path()
 
@@ -128,7 +129,7 @@ class OpacityComponent(FunctionComponent):
 
     def _sync_component_position(self):
         x, y = self._get_screen_position()
-        self.position = (x - COMPONENT_SIZE/2.0, y - COMPONENT_SIZE/2.0)
+        self.position = (x - COMPONENT_SIZE/2, y - COMPONENT_SIZE/2)
 
 
 # Register our function node

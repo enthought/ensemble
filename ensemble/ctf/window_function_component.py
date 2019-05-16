@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import numpy as np
 from scipy.signal import hanning
 
@@ -139,7 +140,7 @@ class WindowHeightWidget(MovableComponent):
     def _sync_component_position(self):
         if self.container.container is not None:
             _, screen_y = self.relative_to_screen(0.0, self.node.opacity)
-            self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2.0)
+            self.position = (0.0, screen_y - HEIGHT_WIDGET_THICKNESS/2)
 
 
 class WindowComponent(BaseColorComponent):

@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from collections import OrderedDict
 
 from mayavi import mlab
@@ -79,8 +80,8 @@ class VolumeCutPlanes(ABCVolumeSceneMember):
 
             lut_manager.use_default_range = False
             data_low, data_high = lut_manager.default_data_range
-            data_level = (data_low + data_high) / 2.0
-            data_radius = (data_high - data_low) / 2.0
+            data_level = (data_low + data_high) / 2
+            data_radius = (data_high - data_low) / 2
             level = data_level - data_radius * self.cut_brightness
             radius = data_radius * pow(2, -self.cut_contrast)
             lut_manager.data_range = (level - radius, level + radius)

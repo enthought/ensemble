@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
 import numpy as np
 import six
@@ -227,14 +227,14 @@ class CtfEditor(Container):
         values = values.astype(float)
         zeros = (values == 0)
         min_nonzero = values[~zeros].min()
-        values[zeros] = min_nonzero / 2.0
+        values[zeros] = min_nonzero / 2
         log_values = np.log(values)
         log_values -= log_values.min()
         log_values /= log_values.max()
 
         h_values = log_values * h
         bin_edges = bin_edges - bin_edges.min()
-        bin_edges *= w / bin_edges.max()
+        bin_edges *= w // bin_edges.max()
         x = np.concatenate([bin_edges[:1],
                             np.repeat(bin_edges[1:-1], 2),
                             bin_edges[-1:]])

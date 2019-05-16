@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
 import json
 
@@ -11,7 +11,7 @@ from .transfer_function import TransferFunction
 def build_screen_to_function(component):
     def func(pos):
         bounds = component.bounds
-        return tuple([clip_to_unit(z / size) for z, size in zip(pos, bounds)])
+        return tuple([clip_to_unit(z // size) for z, size in zip(pos, bounds)])
     return func
 
 

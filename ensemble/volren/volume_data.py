@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import numpy as np
 
 from traits.api import HasStrictTraits, Array, Float, Instance, Property, Tuple
@@ -46,9 +47,9 @@ def _resample_data(image_data):
     """
     spacing = image_data.spacing
     dims = image_data.dimensions
-    output_spacing = (spacing[0] * (dims[0] / 256.0),
-                      spacing[1] * (dims[1] / 256.0),
-                      spacing[2] * (dims[2] / 256.0))
+    output_spacing = (spacing[0] * (dims[0] / 256),
+                      spacing[1] * (dims[1] / 256),
+                      spacing[2] * (dims[2] / 256))
     reslicer = tvtk.ImageReslice(interpolation_mode='cubic',
                                  output_extent=(0, 255, 0, 255, 0, 255),
                                  output_spacing=output_spacing)

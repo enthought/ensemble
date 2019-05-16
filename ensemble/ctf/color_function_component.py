@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from .base_color_function_component import BaseColorComponent, ColorNode
 from .function_component import register_function_component_class
 from .function_node import register_function_node_class
@@ -29,7 +30,7 @@ class ColorComponent(BaseColorComponent):
             # FIXME: Bad choice of contrasting color for grays.
             opposite_color = (1.0 - r, 1.0 - g, 1.0 - b, 1.0)
             gc.set_fill_color(opposite_color)
-            gc.rect(screen_x - COMPONENT_WIDTH/2.0, 0, COMPONENT_WIDTH, height)
+            gc.rect(screen_x - COMPONENT_WIDTH/2, 0, COMPONENT_WIDTH, height)
             gc.draw_path()
 
     @classmethod
@@ -73,7 +74,7 @@ class ColorComponent(BaseColorComponent):
 
     def _sync_component_position(self):
         screen_x, _ = self.relative_to_screen(self.node.center, 0.0)
-        self.position = (screen_x - COMPONENT_WIDTH/2.0, 0.0)
+        self.position = (screen_x - COMPONENT_WIDTH/2, 0.0)
 
 
 # Register our function node

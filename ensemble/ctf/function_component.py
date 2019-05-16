@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from traits.api import Bool, Float, Instance, Property, Tuple
 
 from .function_node import FunctionNode
@@ -77,7 +78,7 @@ class FunctionComponent(MovableComponent):
 
     def screen_to_relative(self, x, y):
         parent_width, parent_height = self.parent_bounds
-        return (x / float(parent_width), y / float(parent_height))
+        return (x / parent_width, y / parent_height)
 
     def update_node_center(self, node, rel_x):
         min_c, max_c = self._center_limits
