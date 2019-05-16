@@ -18,6 +18,13 @@ from .opacity_function_component import OpacityNode, OpacityComponent
 from .transfer_function import TransferFunction
 from .utils import build_screen_to_function
 
+# XXX : We need to pass byte strings instead of unicode strings on Python 2.
+# See https://github.com/enthought/enable/issues/342
+if six.PY2:
+    LINEAR_GRADIENT_ARGS = (b'pad', b'userSpaceOnUse')
+else:
+    LINEAR_GRADIENT_ARGS = ('pad', 'userSpaceOnUse')
+
 
 class BaseCtfEditorAction(Action):
     container = Instance(Container)
@@ -208,13 +215,8 @@ class CtfEditor(Container):
 
         with gc:
             gc.rect(0, 0, w, h)
-            # XXX : We need to pass byte strings instead of unicode strings.
-            # See https://github.com/enthought/enable/issues/342
-            if six.PY2:
-                args = (b'pad', b'userSpaceOnUse')
-            else:
-                args = ('pad', 'userSpaceOnUse')
-            gc.linear_gradient(0, 0, w, 0, grad_stops, *args)
+
+            gc.linear_gradient(0, 0, w, 0, grad_stops, *LINEAR_GRADIENT_ARGS)
             gc.fill_path()
 
     def _draw_histogram(self, gc):
