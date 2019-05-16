@@ -96,7 +96,7 @@ class VolumeRenderer(HasStrictTraits):
             color_tf.add_rgb_point(lerp(color[0]), *(color[1:]))
 
         opacity_tf = tvtk.PiecewiseFunction()
-        alphas = list(self.opacities.values())
+        alphas = self.opacities.values()
         for i, alpha in enumerate(alphas):
             x = alpha[0]
             if i > 0:
