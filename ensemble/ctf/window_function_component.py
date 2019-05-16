@@ -98,7 +98,7 @@ class WindowOpacityNode(OpacityNode):
 
         xs = np.linspace(center - radius, center + radius, num_samples)
         ys = self.window_func(num_samples) * self.opacity
-        return zip(xs, ys)
+        return list(zip(xs, ys))
 
     def _get_window_func(self):
         return WINDOW_FUNCTIONS[self.window_type]
