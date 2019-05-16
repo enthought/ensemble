@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from io import open
 import json
 
 import numpy as np
