@@ -234,7 +234,7 @@ class CtfEditor(Container):
 
         h_values = log_values * h
         bin_edges = bin_edges - bin_edges.min()
-        bin_edges *= w // bin_edges.max()
+        bin_edges *= w / bin_edges.max()
         x = np.concatenate([bin_edges[:1],
                             np.repeat(bin_edges[1:-1], 2),
                             bin_edges[-1:]])
