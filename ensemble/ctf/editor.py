@@ -173,8 +173,8 @@ class CtfEditor(Container):
     # -----------------------------------------------------------------------
 
     def _draw_container_mainlayer(self, gc, *args, **kwargs):
-        color_nodes = self.function.color.values()
-        alpha_nodes = self.function.opacity.values()
+        color_nodes = list(self.function.color.values())
+        alpha_nodes = list(self.function.opacity.values())
 
         gc.clear()
 
