@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
 
 import numpy as np
+import six
 
 from enable.api import ColorTrait, Container
 from pyface.action.api import Action
@@ -16,6 +17,13 @@ from .menu_tool import menu_tool_with_actions
 from .opacity_function_component import OpacityNode, OpacityComponent
 from .transfer_function import TransferFunction
 from .utils import build_screen_to_function
+
+# XXX : We need to pass byte strings instead of unicode strings on Python 2.
+# See https://github.com/enthought/enable/issues/342
+if six.PY2:
+    LINEAR_GRADIENT_ARGS = (b'pad', b'userSpaceOnUse')
+else:
+    LINEAR_GRADIENT_ARGS = ('pad', 'userSpaceOnUse')
 
 
 class BaseCtfEditorAction(Action):
@@ -207,9 +215,8 @@ class CtfEditor(Container):
 
         with gc:
             gc.rect(0, 0, w, h)
-            # XXX : We need to pass byte strings instead of unicode strings.
-            # See https://github.com/enthought/enable/issues/342
-            gc.linear_gradient(0, 0, w, 0, grad_stops, b'pad', b'userSpaceOnUse')
+
+            gc.linear_gradient(0, 0, w, 0, grad_stops, *LINEAR_GRADIENT_ARGS)
             gc.fill_path()
 
     def _draw_histogram(self, gc):
@@ -220,7 +227,7 @@ class CtfEditor(Container):
         values = values.astype(float)
         zeros = (values == 0)
         min_nonzero = values[~zeros].min()
-        values[zeros] = min_nonzero / 2.0
+        values[zeros] = min_nonzero / 2
         log_values = np.log(values)
         log_values -= log_values.min()
         log_values /= log_values.max()

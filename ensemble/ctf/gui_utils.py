@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from enaml.colors import Color
 import traits_enaml
 
@@ -12,7 +13,7 @@ def get_color(starting_color=None):
     If no color is selected (because the user cancels the dialog), return None.
     """
     def color_as_tuple(color):
-        return (color.red/255., color.green/255., color.blue/255.)
+        return (color.red/255, color.green/255, color.blue/255)
 
     def tuple_as_color(tup):
         r, g, b = tup

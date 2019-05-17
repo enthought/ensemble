@@ -1,8 +1,10 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import os
 import unittest
 
 import numpy as np
+import six
 
 import vtk
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
@@ -34,7 +36,7 @@ class VolumeViewerTestCase(EnamlTestAssistant, unittest.TestCase):
 
         EnamlTestAssistant.setUp(self)
 
-        enaml_source = b"""
+        enaml_source = """
 from enaml.widgets.api import Container
 from ensemble.volren.volume_viewer_ui import VolumeViewerContainer
 
@@ -45,6 +47,8 @@ enamldef MainView(Container): view:
         viewer << view.viewer
 
 """
+        if six.PY2:
+            enaml_source = enaml_source.encode('utf-8')
         volume = np.random.normal(size=(32, 32, 32))
         volume = (255*(volume-volume.min())/volume.ptp()).astype(np.uint8)
         volume_data = VolumeData(raw_data=volume)
@@ -74,8 +78,8 @@ enamldef MainView(Container): view:
         """
         mask = np.zeros_like(volume_array)
         depth, height, width = mask.shape
-        half = (depth/2, height/2, width/2)
-        quarter = (depth/4, height/4, width/4)
+        half = (depth // 2, height // 2, width // 2)
+        quarter = (depth // 4, height // 4, width // 4)
         axis_slices = [slice(half[i]-quarter[i], half[i]+quarter[i])
                        for i in range(3)]
         mask[axis_slices[0], axis_slices[1], axis_slices[2]] = 255

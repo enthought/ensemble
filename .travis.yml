@@ -9,19 +9,29 @@ cache:
   directories:
     - "~/.cache"
 
+matrix:
+  include:
+    - env: RUNTIME=2.7 TOOLKIT="pyside"
+    - env: RUNTIME=3.6 TOOLKIT="pyqt"
+    - os: osx
+      env: RUNTIME=2.7 TOOLKIT="pyside"
+    - os: osx
+      env: RUNTIME=3.6 TOOLKIT="pyqt"
+  fast_finish: true
+
 before_install:
   - mkdir -p "${HOME}/.cache/download"
   - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sh -e install-edm-linux.sh
-  - export PATH="${HOME}/edm/bin:${PATH}"
+  - if [[ ${TRAVIS_OS_NAME} == "linux" ]] ; then sh -e /etc/init.d/xvfb start; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'linux' ]]; then ./install-edm-linux.sh; export PATH="${HOME}/edm/bin:${PATH}"; fi
+  - if [[ ${TRAVIS_OS_NAME} == 'osx' ]]; then ./install-edm-osx.sh; export PATH="${PATH}:/usr/local/bin"; fi
   - export ETS_TOOLKIT=qt4
   - export IS_CI=1
   - edm install -y wheel click coverage
 install:
-  - edm run -- python -m etstool install
+  - edm run -- python -m etstool install --runtime=${RUNTIME} --toolkit=${TOOLKIT}
 script:
-  - edm run -- python -m etstool test
+  - edm run -- python -m etstool test --runtime=${RUNTIME} --toolkit=${TOOLKIT}
 after_success:
   - edm run -- coverage combine
   - edm run -- pip install codecov

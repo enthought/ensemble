@@ -1,7 +1,9 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 import json
 
 import numpy as np
+import six
 
 from .transfer_function import TransferFunction
 
@@ -35,7 +37,11 @@ def save_ctf(transfer_func, filename):
     """
     function_data = transfer_func.to_dict()
     with open(filename, 'wb') as fp:
-        json.dump(function_data, fp, indent=1)
+        data = json.dumps(function_data, indent=1)
+        if six.PY2:
+            fp.write(data)
+        else:
+            fp.write(data.encode('utf-8'))
 
 
 def trapezoid_window(num_points):

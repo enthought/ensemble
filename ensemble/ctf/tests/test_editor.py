@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import unittest
 
+import six
+
 from enable.testing import EnableTestAssistant
 from traits_enaml.testing.enaml_test_assistant import EnamlTestAssistant
 
@@ -21,7 +23,7 @@ class TestEditor(EnamlTestAssistant, EnableTestAssistant, unittest.TestCase):
     def setUp(self):
         EnamlTestAssistant.setUp(self)
 
-        enaml_source = b"""
+        enaml_source = """
 from enaml.widgets.api import MainWindow
 from traits_enaml.widgets.enable_canvas import EnableCanvas
 
@@ -33,7 +35,8 @@ enamldef MainView(MainWindow):
     EnableCanvas:
         component << editor
 """
-
+        if six.PY2:
+            enaml_source = enaml_source.encode('utf-8')
         editor = CtfEditor(bounds=(400, 100),
                            prompt_color_selection=get_color)
 

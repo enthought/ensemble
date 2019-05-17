@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import division, unicode_literals
+
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.tools.tools import add_dataset
 from traits.api import (HasStrictTraits, CInt, Enum, Instance, List, Property,
@@ -68,7 +69,7 @@ class VolumeRenderer(HasStrictTraits):
     clip_bounds = List(CInt)
 
     # Render quality setting
-    render_quality = Enum('default', QUALITY_SETTINGS.keys())
+    render_quality = Enum('default', list(QUALITY_SETTINGS.keys()))
 
     # -------------------------------------------------------------------------
     # Public interface
@@ -156,7 +157,7 @@ class VolumeRenderer(HasStrictTraits):
         if self.data is None:
             return
 
-        bounds = [b/CLIP_MAX for b in self.data.bounds]
+        bounds = [b//CLIP_MAX for b in self.data.bounds]
         mn = [bounds[i]*pos for i, pos in enumerate(self.clip_bounds[::2])]
         mx = [bounds[i]*pos for i, pos in enumerate(self.clip_bounds[1::2])]
         planes = tvtk.Planes()
