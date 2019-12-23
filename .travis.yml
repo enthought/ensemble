@@ -1,9 +1,14 @@
 language: generic
-sudo: false
-
+dist: xenial
+services:
+  - xvfb
+addons:
+  apt:
+    packages:
+      - libglu1-mesa
 env:
   global:
-    - INSTALL_EDM_VERSION=1.10.0
+    - INSTALL_EDM_VERSION=2.0.0
 
 cache:
   directories:
@@ -21,8 +26,6 @@ matrix:
 
 before_install:
   - mkdir -p "${HOME}/.cache/download"
-  - export DISPLAY=:99.0
-  - if [[ ${TRAVIS_OS_NAME} == "linux" ]] ; then sh -e /etc/init.d/xvfb start; fi
   - if [[ ${TRAVIS_OS_NAME} == 'linux' ]]; then ./install-edm-linux.sh; export PATH="${HOME}/edm/bin:${PATH}"; fi
   - if [[ ${TRAVIS_OS_NAME} == 'osx' ]]; then ./install-edm-osx.sh; export PATH="${PATH}:/usr/local/bin"; fi
   - export ETS_TOOLKIT=qt4
